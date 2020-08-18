@@ -33,7 +33,7 @@ class MainActivity : BaseActivity(), MainConstract.View {
     private lateinit var user : FirebaseUser
     private lateinit var mPresenter: MainPresenter
     private lateinit var userData : ArrayList<String>
-
+    // init
     companion object {
         private const val CAMERA_PERMISSION_REQUEST_CODE = 1
         private const val CAMERA_PERMISSION = Manifest.permission.CAMERA
