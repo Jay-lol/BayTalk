@@ -10,9 +10,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.*
 import com.jay.baytalk.adapter.PageAdapter
@@ -33,6 +36,8 @@ class MainActivity : BaseActivity(), MainConstract.View {
     private lateinit var user : FirebaseUser
     private lateinit var mPresenter: MainPresenter
     private lateinit var userData : ArrayList<String>
+    private lateinit var functions: FirebaseFunctions
+
     // init
     companion object {
         private const val CAMERA_PERMISSION_REQUEST_CODE = 1
@@ -64,6 +69,8 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
         loadName(auth.currentUser)
 
+        functions = Firebase.functions
+
         setButton()
 
         checkCameraPermission()
@@ -84,7 +91,28 @@ class MainActivity : BaseActivity(), MainConstract.View {
         faceChat.setOnClickListener {
             AlertDialog.Builder(this).setTitle("Error").setMessage(userName+"님 서버가 닫혀있습니다")
                 .create().show()
+            addMessage("테테테테테테테테테테테테테테테")
+
         }
+    }
+
+    private fun addMessage(text: String): Task<String> {
+        // Create the arguments to the callable function.
+        val data = hashMapOf(
+            "text" to text,
+            "push" to true
+        )
+
+        return functions
+            .getHttpsCallable("addMessage")
+            .call(data)
+            .continueWith { task ->
+                // This continuation runs on either success or failure, but if the task
+                // has failed then result will throw an Exception which will be
+                // propagated down.
+                val result = task.result?.data as String
+                result
+            }
     }
 
     private fun loadName(currentUser: FirebaseUser?) {
