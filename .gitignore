@@ -9,7 +9,7 @@
 /app/build
 /app/release
 /app/google-services.json
-/app/BayTalk.apk
+/app/*.apk
 /build
 /captures
 .externalNativeBuild
