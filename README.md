@@ -1,6 +1,7 @@
 # BayTalk
 
 welcome to our BayTalk!!
+<br>
 사용법: 안드로이드 핸드폰으로 
 폴더안에 apk파일을 다운받아서 설치해주세요. 1.0버전입니다
 

@@ -15,6 +15,9 @@ import com.jay.baytalk.presenter.RoomConstract
 import com.jay.baytalk.presenter.RoomPresenter
 import com.jay.baytalk.static.Companion.userName
 import kotlinx.android.synthetic.main.activity_chat_room.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.yesButton
 
 class RoomActivity : BaseActivity(), RoomConstract.View, OnItemClick {
     private var cPresenter : RoomPresenter?  = null
@@ -56,6 +59,14 @@ class RoomActivity : BaseActivity(), RoomConstract.View, OnItemClick {
                 cPresenter?.sendMessage(content.text.toString(), userName, userUid)
             }
             content.text.clear()
+        }
+        function.setOnClickListener{
+            this.alert("추가 기능은 개발단계에 있습니다", "추가 기능") {
+                yesButton {
+                }
+                noButton {
+                }
+            }.show()
         }
     }
 
