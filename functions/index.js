@@ -86,8 +86,144 @@ exports.makeUppercase = functions.database.ref('/Message/{}/{pushId}/name')
         //
         // return snapshot.ref.parent.parent.parent.parent.child('RoomUser')
         //     .child.child(x).child('lastMessage').update(uppercase);
-        const ee = "Beyou";
+        const ee = "신규유저는 아닙니다";
         // return snapshot.ref.parent.child('uppercase').set(uppercase);
         return snapshot.ref.parent.parent.parent.parent.child('Users').child(context.auth.uid)
             .update({'statusMessage': ee})
-    });
+});
+
+exports.sendFCM = functions.database.ref('/Message/{}/{pushId}/')
+    .onCreate((snapshot, context) => {
+        const msName = snapshot.child('name').val().toString();
+        const msMessage = snapshot.child('message').val().toString();
+        const msTime = snapshot.child('time').val().toString();
+        console.log('Name', msName);
+        console.log('Time', msMessage);
+        const roomName = snapshot.ref.parent.key;   // 방번호가 나옴
+        console.log('FCM roomname', roomName);
+
+        // console.log('FCM1', snapshot.ref.parent.parent.parent.child("UserInRoom")
+        //     .child(roomName).get);
+        // console.log('FCM2', snapshot.ref.parent.parent.parent.child("UserInRoom").child(roomName).child().key);
+        // return snapshot.ref.parent.parent.parent.parent.child('Users').child(context.auth.uid)
+        //     .update({'statusMessage': ee})
+        const promiseRoomUserList = admin.database()
+            .ref(`UserInRoom/${roomName}`).once('value'); // 채팅방 유저리스트
+
+        return Promise.all([promiseRoomUserList]).then(results => {
+            const userRoomSnapShot = results[0]
+            const arrRoomUserList =[];
+            if(userRoomSnapShot.hasChildren()){
+                userRoomSnapShot.forEach(snapshot => {
+                    arrRoomUserList.push(snapshot.key);
+                return null}
+                )
+            }else{
+                return console.log('RoomUserlist is null')
+            }
+
+            const arrTargetUserList = arrRoomUserList;
+
+            for(let i=0; i < arrTargetUserList.length; i++){
+                admin.database().ref(`FcmId/${arrTargetUserList[i]}`).once("value",function(snapshot) {
+                    const token = snapshot.val();
+                    if (token) {
+                        var message = {
+                            data: {
+                                title: msName,
+                                body: msMessage,
+                                time: msTime
+                            },
+                            token: token
+                        };
+
+// Send a message to the device corresponding to the provided
+// registration token.
+                        admin.messaging().send(message)
+                            .then((response) => {
+                                // Response is a message ID string.
+                                console.log('Successfully sent message:', response);
+                                return null
+                            })
+                            .catch((error) => {
+                                console.log('Error sending message:', error);
+                                return null
+                            });
+                        //메세지발송
+                        // admin.messaging().sendToDevice(token, payload).then(response => {
+                        //     response.results.forEach((result, index) => {
+                        //         const error = result.error;
+                        //         if (error) {
+                        //             console.error('FCM 실패 :', error.code);
+                        //         }else{
+                        //             console.log('FCM 성공');
+                        //         }
+                        //     });
+                        //     return null
+                        // });
+                    }
+                });
+            }
+            return null
+        }, reason => {
+            console.log('fail', reason)
+        });
+
+
+
+        //2차
+        // var dbRecording = snapshot.ref.parent.parent.parent.child('UserInRoom/'+roomName);
+        // admin.database().ref(`UserInRoom/${roomName}`).once("value", function(snapshot) {
+        //     snapshot.forEach(function(child) {
+        //         console.log(child.key+": "+child.val());
+        //         admin.database().ref(`FcmId/${child.key}`).once('value', function(snapshot){
+        //
+        //             console.log("FVCKYOU", snapshot.val())
+        //     });
+        //
+        //     });
+        // });
+        //2차
+
+//         var registrationToken = "dM1_YRfrTX-S-sTAijzJPY:APA91bH5vHEyGUrfZsuucHPa27ld6J6Bj_4tXrc2YSYmY5ggtPaHogT2Hbx9tjmnVpuj2YZsIhsBTsecEsIEn30GQmLTXxQPC_yJqT3gtuVfr0OAmCikk0z5m5-MekV2UUO__mQlZLUe"
+//         // This registration token comes from the client FCM SDKs.
+//
+//         var message = {
+//             data: {
+//                 title: "test!!",
+//                 body: "TEST ING!!",
+//                 time: '2:45'
+//             },
+//             token: registrationToken
+//         };
+//
+// // Send a message to the device corresponding to the provided
+// // registration token.
+//         admin.messaging().send(message)
+//             .then((response) => {
+//                 // Response is a message ID string.
+//                 console.log('Successfully sent message:', response);
+//                 return null
+//             })
+//             .catch((error) => {
+//                 console.log('Error sending message:', error);
+//                 return null
+//             });
+    //여까지
+    // var payload = {
+    //     notification: {
+    //         title: "TEST!!",
+    //         body: "TESt ING"
+    //     }
+    // }
+    //
+    // var result = admin.messaging().sendToDevice(token, payload).then((response) => {
+    //     // Response is a message ID string.
+    //     console.log('Successfully sent message:', response);
+    //     return null
+    // })
+    //     .catch((error) => {
+    //         console.log('Error sending message:', error);
+    // });
+    // return result;
+});

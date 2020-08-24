@@ -62,6 +62,12 @@ object ChatRoomList {
         })
     }
 
+    fun sendFcmId(fcm : String){
+        val database = Firebase.database
+        val myRef = database.getReference("FcmId/${Firebase.auth.currentUser?.uid}")
+        myRef.setValue(fcm)
+    }
+
     fun showError(error: String) {
         Log.d(TAG, error)
     }

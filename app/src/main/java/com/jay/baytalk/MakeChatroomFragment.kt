@@ -78,6 +78,12 @@ class MakeChatroomFragment : Fragment(), OnItemClick {
                     hashMap["userName"] = userNameList
                     hashMap["userUid"] = x
                     myRef.setValue(hashMap)
+
+                }
+
+                for (i in x){
+                    myRef = database.getReference("UserInRoom/$roomName/$i")
+                    myRef.setValue(true)
                 }
 
                 x.clear()

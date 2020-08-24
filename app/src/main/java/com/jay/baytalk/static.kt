@@ -11,5 +11,6 @@ class static {
         var activity : SplashActivity? = null
         var frag : MakeChatroomFragment? = null
         var userName : String? = null
+        var mIsInForegroundMode : Boolean = false
     }
 }

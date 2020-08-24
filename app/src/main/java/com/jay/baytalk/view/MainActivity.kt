@@ -4,19 +4,18 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.jay.baytalk.*
 import com.jay.baytalk.adapter.PageAdapter
 import com.jay.baytalk.base.BaseActivity
@@ -51,6 +50,7 @@ class MainActivity : BaseActivity(), MainConstract.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         static.mainActivity = this
+        static.mIsInForegroundMode = true
         Log.d(TAG, "onCreate!!!!!!")
         auth.currentUser
         if (auth.currentUser != null) {
@@ -67,13 +67,18 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
         connectAdapter()
 
+
         loadName(auth.currentUser)
 
         functions = Firebase.functions
 
         setButton()
-
+        setFcm()
         checkCameraPermission()
+    }
+
+    private fun setFcm() {
+        mPresenter.setFcm(applicationContext)
     }
 
     private fun connectAdapter() {
@@ -91,7 +96,7 @@ class MainActivity : BaseActivity(), MainConstract.View {
         faceChat.setOnClickListener {
             AlertDialog.Builder(this).setTitle("Error").setMessage(userName+"님 서버가 닫혀있습니다")
                 .create().show()
-            addMessage("테테테테테테테테테테테테테테테")
+
 
         }
     }
@@ -115,6 +120,14 @@ class MainActivity : BaseActivity(), MainConstract.View {
             }
     }
 
+    override fun onResume() {
+        super.onResume()
+        static.mIsInForegroundMode = true
+    }
+    override fun onPause(){
+        super.onPause()
+        static.mIsInForegroundMode = false
+    }
     private fun loadName(currentUser: FirebaseUser?) {
         currentUser?.let {
             mPresenter.welcome(currentUser, object : MyCallback {
@@ -150,13 +163,8 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
     override fun onBackPressed() {
         if (frag == null) {
-            this.alert("앱을 종료하시겠습니까??", "종료") {
-                yesButton {
-                    super.onBackPressed()
-                }
-                noButton {
-                }
-            }.show()
+            static.mIsInForegroundMode = false
+            super.onBackPressed()
         } else {
             supportFragmentManager.popBackStack()
             frag = null

@@ -1,16 +1,19 @@
 package com.jay.baytalk.presenter
 
+import android.content.Context
 import android.util.Log
-import android.widget.Toast
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.MyCallback
-import com.jay.baytalk.view.MainActivity
+import com.jay.baytalk.R
+import com.jay.baytalk.model.ChatRoomList
 
 class MainPresenter : MainConstract.Presenter {
     private var mView : MainConstract.View? = null
@@ -42,6 +45,25 @@ class MainPresenter : MainConstract.Presenter {
 
     override fun takeView(view: MainConstract.View) {
         mView = view
+    }
+
+    fun setFcm(context: Context) {
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w(TAG, "getInstanceId failed", task.exception)
+                    return@OnCompleteListener
+                }
+
+                // Get new Instance ID token
+                val token = task.result?.token
+
+                // Log and toast
+                val msg = context.getString(R.string.msg_token_fmt, token)
+                Log.d(TAG, msg)
+                token?.let{ChatRoomList.sendFcmId(it)}
+
+            })
     }
 
 

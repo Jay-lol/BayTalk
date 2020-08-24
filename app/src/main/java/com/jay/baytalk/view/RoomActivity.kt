@@ -13,6 +13,7 @@ import com.jay.baytalk.model.MessageData
 import com.jay.baytalk.model.RecyclerMessageAdapter
 import com.jay.baytalk.presenter.RoomConstract
 import com.jay.baytalk.presenter.RoomPresenter
+import com.jay.baytalk.static
 import com.jay.baytalk.static.Companion.userName
 import kotlinx.android.synthetic.main.activity_chat_room.*
 import org.jetbrains.anko.alert
@@ -24,9 +25,21 @@ class RoomActivity : BaseActivity(), RoomConstract.View, OnItemClick {
     private var rAdapter : RecyclerMessageAdapter? = null
     private var mList : List<MessageData>? = null
     private var userUid : List<String>? = null
+    override fun onPause() {
+        super.onPause()
+        static.mIsInForegroundMode = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        static.mIsInForegroundMode = true
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        static.mIsInForegroundMode = true
         setContentView(R.layout.activity_chat_room)
+        window.setBackgroundDrawableResource(R.drawable.chatroom)
         cPresenter?.takeView(this)
 
         messageRecycler.layoutManager = LinearLayoutManager(this)

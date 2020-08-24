@@ -7,14 +7,14 @@
         android:layout_height="match_parent"
         tools:context=".view.RoomActivity"
         android:focusable="true"
-        android:focusableInTouchMode="true" android:background="@drawable/chatroom">
+        android:focusableInTouchMode="true" android:foregroundGravity="top" android:isScrollContainer="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
                                                        android:layout_height="wrap_content"
-                                                       app:layout_constraintBottom_toBottomOf="parent"
                                                        app:layout_constraintEnd_toEndOf="parent"
                                                        app:layout_constraintStart_toStartOf="parent"
-                                                       android:id="@+id/constraintLayout3">
+                                                       android:id="@+id/constraintLayout3"
+                                                       app:layout_constraintBottom_toBottomOf="parent">
         <EditText
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
