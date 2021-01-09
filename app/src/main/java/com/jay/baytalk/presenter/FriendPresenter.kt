@@ -1,50 +1,27 @@
 package com.jay.baytalk.presenter
 
 import android.util.Log
-import com.jay.baytalk.MyCallback
+import com.jay.baytalk.model.data.Friend
 import com.jay.baytalk.model.FriendList
 
 class FriendPresenter(view: FriendConstract.View) : FriendConstract.Presenter {
     private val searchView: FriendConstract.View = view
-    private val TAG = "FriendPresenter"
+    private val TAG = "로그"
 
     init {
         searchView.setPresenter(this)
     }
 
     override fun buttonClickAction() {
-        searchView.ShowToast("Success")
+        searchView.showToast("Success")
     }
 
-    override fun getFriendList(myCallback: MyCallback) {
-        FriendList.getFriendlist(object : MyCallback {
-            override fun onCallback(value: List<Any>?) {
-                Log.d(TAG, value.toString())
-                if (value != null) {
-                    myCallback.onCallback(value)
-                } else
-                    Log.d(TAG , "No Friend")
-            }
-        })
-
+    override fun getFriendList() {
+        FriendList.loadFriend { value ->
+            value?:return@loadFriend
+            searchView.loadFriendList(value)
+        }
     }
 }
-
-
-//class onePresenter : SearchContract.Presenter {
-//
-//    private var searchView : SearchContract.View? = null
-//
-//
-//    override fun takeView(view: SearchContract.View) {
-//        searchView = view
-//        searchView!!.setPresenter(this)
-//    }
-//
-//    override fun buttonClickAction() {
-//        searchView?.ShowToast("Success")
-//    }
-//
-//}
 
 

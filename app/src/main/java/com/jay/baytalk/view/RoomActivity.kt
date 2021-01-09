@@ -1,50 +1,45 @@
 package com.jay.baytalk.view
 
 import android.os.Bundle
-import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.jay.baytalk.MyCallback
-import com.jay.baytalk.OnItemClick
 import com.jay.baytalk.R
 import com.jay.baytalk.base.BaseActivity
-import com.jay.baytalk.model.MessageData
-import com.jay.baytalk.model.RecyclerMessageAdapter
+import com.jay.baytalk.model.data.MessageData
+import com.jay.baytalk.adapter.RecyclerMessageAdapter
 import com.jay.baytalk.presenter.RoomConstract
 import com.jay.baytalk.presenter.RoomPresenter
-import com.jay.baytalk.static
-import com.jay.baytalk.static.Companion.userName
+import com.jay.baytalk.InfoManager
+import com.jay.baytalk.InfoManager.userName
 import kotlinx.android.synthetic.main.activity_chat_room.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.yesButton
 
-class RoomActivity : BaseActivity(), RoomConstract.View, OnItemClick {
-    private var cPresenter : RoomPresenter?  = null
-    private var rAdapter : RecyclerMessageAdapter? = null
-    private var mList : List<MessageData>? = null
-    private var userUid : List<String>? = null
+class RoomActivity : BaseActivity(), RoomConstract.View {
+    private var cPresenter: RoomPresenter? = null
+    private var rAdapter: RecyclerMessageAdapter? = null
+    private var mList: List<MessageData>? = null
+    private var userUid: List<String>? = null
     override fun onPause() {
         super.onPause()
-        static.mIsInForegroundMode = false
+        InfoManager.mIsInForegroundMode = false
     }
 
     override fun onResume() {
         super.onResume()
-        static.mIsInForegroundMode = true
+        InfoManager.mIsInForegroundMode = true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        static.mIsInForegroundMode = true
+        InfoManager.mIsInForegroundMode = true
         setContentView(R.layout.activity_chat_room)
         window.setBackgroundDrawableResource(R.drawable.chatroom)
         cPresenter?.takeView(this)
 
-        messageRecycler.layoutManager = LinearLayoutManager(this)
-        rAdapter = RecyclerMessageAdapter(mList, this, Firebase.auth.currentUser?.uid)
-        messageRecycler.adapter = rAdapter
+        setAdapter()
 
         loadMessage(intent.getStringExtra("roomId"))
         chatName.text = intent.getStringExtra("roomName")
@@ -53,27 +48,24 @@ class RoomActivity : BaseActivity(), RoomConstract.View, OnItemClick {
         setButton()
     }
 
+    private fun setAdapter() {
+        messageRecycler.layoutManager = LinearLayoutManager(this)
+        rAdapter = RecyclerMessageAdapter(mList, Firebase.auth.currentUser?.uid)
+        messageRecycler.adapter = rAdapter
+    }
+
     private fun loadMessage(stringExtra: String?) {
-        cPresenter?.getMessage(stringExtra, object : MyCallback{
-            override fun onCallback(value: List<Any>?) {
-                if (value != null) {
-                    rAdapter!!.refresh(value as List<MessageData>)
-                    rAdapter!!.notifyDataSetChanged()
-                    messageRecycler.scrollToPosition(rAdapter!!.itemCount-1)
-                } else
-                    Log.d("RoomAc" , "No Msg")
-            }
-        })
+        cPresenter?.getMessage(stringExtra)
     }
 
     private fun setButton() {
         sendMessage.setOnClickListener {
-            if (content.text.toString()!="") {
+            if (content.text.toString() != "") {
                 cPresenter?.sendMessage(content.text.toString(), userName, userUid)
             }
             content.text.clear()
         }
-        function.setOnClickListener{
+        function.setOnClickListener {
             this.alert("추가 기능은 개발단계에 있습니다", "추가 기능") {
                 yesButton {
                 }
@@ -84,20 +76,22 @@ class RoomActivity : BaseActivity(), RoomConstract.View, OnItemClick {
     }
 
 
-
     override fun initPresenter() {
         cPresenter = RoomPresenter()
     }
 
-    override fun showList(message: ArrayList<List<String>>) {
-
+    override fun showList(message: List<MessageData>) {
+        rAdapter?:return
+        rAdapter!!.refresh(message)
+        rAdapter!!.notifyDataSetChanged()
+        messageRecycler.scrollToPosition(rAdapter!!.itemCount - 1)
     }
 
     override fun showError(error: String) {
 
     }
 
-    override fun ShowToast(text: String) {
+    override fun showToast(msg: String) {
 
     }
 
@@ -105,7 +99,4 @@ class RoomActivity : BaseActivity(), RoomConstract.View, OnItemClick {
 
     }
 
-    override fun onClick(rid: String, t: Any, i: Int) {
-
-    }
 }

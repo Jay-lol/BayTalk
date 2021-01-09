@@ -8,7 +8,7 @@ import android.os.Handler
 import android.view.View
 import android.widget.Toast
 import com.jay.baytalk.R
-import com.jay.baytalk.static
+import com.jay.baytalk.InfoManager
 
 
 class SplashActivity : AppCompatActivity() {
@@ -16,7 +16,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
-        static.activity = this      // friendlist가 모두 로딩되면. fragment에서 finish로 종료한다
+        InfoManager.activity = this      // friendlist 가 모두 로딩되면. fragment에서 finish로 종료한다
         val view = window.decorView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // 23 버전 이상일 때 상태바 하얀 색상에 회색 아이콘 색상을 설정
@@ -33,5 +33,5 @@ class SplashActivity : AppCompatActivity() {
 
     }
 
-    override fun onBackPressed() {}
+
 }

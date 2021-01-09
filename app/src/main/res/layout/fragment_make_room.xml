@@ -5,7 +5,7 @@
              android:layout_height="match_parent"
              android:background="#CDE9FF"
              android:elevation="30sp"
-             tools:context=".MakeChatroomFragment">
+             tools:context=".view.MakeChatroomFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
                                                        android:layout_height="match_parent"

@@ -1,31 +1,33 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jay.baytalk.R
+import com.jay.baytalk.model.data.Friend
 import kotlinx.android.synthetic.main.recycler_friend.view.*
 
 
-class RecyclerFriendListAdapter(fList : List<Friend>?) : RecyclerView.Adapter<RecyclerFriendListAdapter.fViewH>() {
+class RecyclerFriendListAdapter(fList : List<Friend>?)
+    : RecyclerView.Adapter<RecyclerFriendListAdapter.FriendViewHolder>() {
 
     private var flist = fList
 
-    class fViewH(view: View) : RecyclerView.ViewHolder(view) {
+    inner class FriendViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var rid : Int? = null
         var name = view.name
         var email = view.email
         var isMe = view.itsme
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): fViewH {
-        return fViewH(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendViewHolder {
+        return FriendViewHolder(
             LayoutInflater.from(parent.context)
                 .inflate(R.layout.recycler_friend, parent, false))
     }
 
-    override fun onBindViewHolder(holder: fViewH, position: Int) {
+    override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
         if (position==0)
             holder.isMe.visibility = View.VISIBLE
         else
@@ -39,7 +41,7 @@ class RecyclerFriendListAdapter(fList : List<Friend>?) : RecyclerView.Adapter<Re
         return flist?.size ?: 0
     }
 
-    fun refresh(newList : List<Friend>){
+    fun refreshFriendList(newList : List<Friend>){
         flist = newList
     }
 

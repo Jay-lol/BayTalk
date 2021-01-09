@@ -3,16 +3,14 @@ package com.jay.baytalk.view
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.R
-import com.jay.baytalk.static
-import com.jay.baytalk.static.Companion.loginActivity
-import com.jay.baytalk.static.Companion.mainActivity
+import com.jay.baytalk.InfoManager
+import com.jay.baytalk.InfoManager.loginActivity
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
@@ -21,7 +19,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         loginActivity = this
-        static.activity?.finish()
+        InfoManager.activity?.finish()
 
         login.setOnClickListener {
             val progressDialog = ProgressDialog(this)
@@ -35,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
                     .addOnCompleteListener(this) {
                         progressDialog.dismiss()
                         if (it.isSuccessful) {
-                            static.activity?.finish()
+                            InfoManager.activity?.finish()
                             startActivity(Intent(this, MainActivity::class.java))
                             login.isClickable = true
                         } else {

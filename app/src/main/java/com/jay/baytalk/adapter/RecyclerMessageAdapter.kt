@@ -1,26 +1,24 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.adapter
 
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.marginTop
 import androidx.recyclerview.widget.RecyclerView
 import com.jay.baytalk.OnItemClick
 import com.jay.baytalk.R
+import com.jay.baytalk.model.data.MessageData
 import kotlinx.android.synthetic.main.recycler_message.view.*
 import java.text.SimpleDateFormat
 
 class RecyclerMessageAdapter(
     mList: List<MessageData>?,
-    listner: OnItemClick,
     uid: String?
 ) : RecyclerView.Adapter<RecyclerMessageAdapter.mViewH>() {
 
     private var mlist = mList
     private val uId = uid
-    private val callback = listner
 
     class mViewH(view: View) : RecyclerView.ViewHolder(view) {
         var rid: Int? = null

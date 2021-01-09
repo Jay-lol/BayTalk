@@ -1,4 +1,4 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.model.data
 
 import android.util.Log
 import com.google.firebase.iid.FirebaseInstanceId

@@ -4,8 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -15,43 +13,33 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
 import com.jay.baytalk.*
 import com.jay.baytalk.adapter.PageAdapter
 import com.jay.baytalk.base.BaseActivity
 import com.jay.baytalk.presenter.MainConstract
 import com.jay.baytalk.presenter.MainPresenter
-import com.jay.baytalk.static.Companion.frag
-import com.jay.baytalk.static.Companion.loginActivity
-import com.jay.baytalk.static.Companion.userName
+import com.jay.baytalk.InfoManager.frag
+import com.jay.baytalk.InfoManager.loginActivity
+import com.jay.baytalk.InfoManager.userData
+import com.jay.baytalk.InfoManager.userName
+import com.jay.baytalk.extension.showToaster
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.bundleOf
-import org.jetbrains.anko.noButton
-import org.jetbrains.anko.yesButton
 import java.com.jay.baytalk.RTCClient
 
 class MainActivity : BaseActivity(), MainConstract.View {
-    private lateinit var user : FirebaseUser
     private lateinit var mPresenter: MainPresenter
-    private lateinit var userData : ArrayList<String>
     private lateinit var functions: FirebaseFunctions
 
-    // init
-    companion object {
-        private const val CAMERA_PERMISSION_REQUEST_CODE = 1
-        private const val CAMERA_PERMISSION = Manifest.permission.CAMERA
-        private const val TAG = "MainActivity"
-    }
+    private val CAMERA_PERMISSION = Manifest.permission.CAMERA
+    private val CAMERA_PERMISSION_REQUEST_CODE = 1
 
     private lateinit var rtcClient: RTCClient
-    var auth = Firebase.auth
+    private val auth = Firebase.auth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        static.mainActivity = this
-        static.mIsInForegroundMode = true
-        Log.d(TAG, "onCreate!!!!!!")
+        InfoManager.mainActivity = this
+        InfoManager.mIsInForegroundMode = true
         auth.currentUser
         if (auth.currentUser != null) {
             startActivity(Intent(this, SplashActivity::class.java))
@@ -66,7 +54,6 @@ class MainActivity : BaseActivity(), MainConstract.View {
         mPresenter.takeView(this)
 
         connectAdapter()
-
 
         loadName(auth.currentUser)
 
@@ -84,7 +71,7 @@ class MainActivity : BaseActivity(), MainConstract.View {
     private fun connectAdapter() {
         val adapter = PageAdapter(supportFragmentManager)
         adapter.addItem(FriendFragment())
-        adapter.addItem(ChatFragment())
+        adapter.addItem(RoomListFragment())
         main_viewPager.adapter = adapter
         main_tabLayout.setupWithViewPager(main_viewPager)
 
@@ -96,8 +83,6 @@ class MainActivity : BaseActivity(), MainConstract.View {
         faceChat.setOnClickListener {
             AlertDialog.Builder(this).setTitle("Error").setMessage(userName+"님 서버가 닫혀있습니다")
                 .create().show()
-
-
         }
     }
 
@@ -122,22 +107,22 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
     override fun onResume() {
         super.onResume()
-        static.mIsInForegroundMode = true
+        InfoManager.mIsInForegroundMode = true
     }
     override fun onPause(){
         super.onPause()
-        static.mIsInForegroundMode = false
+        InfoManager.mIsInForegroundMode = false
     }
+
     private fun loadName(currentUser: FirebaseUser?) {
-        currentUser?.let {
-            mPresenter.welcome(currentUser, object : MyCallback {
-                override fun onCallback(value: List<Any>?) {
-                    userName = value?.get(0).toString()
-//                Toast.makeText(baseContext, userName + "님 환영합니다", Toast.LENGTH_LONG).show()
-                    userData = arrayListOf(auth.currentUser!!.uid, value?.get(0).toString())
-                }
-            })
-        }
+        currentUser?:return
+        mPresenter.welcome(currentUser)
+    }
+
+    override fun welcomeMent(name : String){
+        userName = name
+        this.showToaster("${userName}님 환영합니다")
+        userData = arrayListOf(auth.currentUser!!.uid, userName!!)
     }
 
     override fun initPresenter() {
@@ -160,10 +145,10 @@ class MainActivity : BaseActivity(), MainConstract.View {
     }
 
 
-
     override fun onBackPressed() {
+        // FCM관련 처리
         if (frag == null) {
-            static.mIsInForegroundMode = false
+            InfoManager.mIsInForegroundMode = false
             super.onBackPressed()
         } else {
             supportFragmentManager.popBackStack()
@@ -171,25 +156,9 @@ class MainActivity : BaseActivity(), MainConstract.View {
         }
     }
 
-    override fun makeRoom(){
-        val fragmentManager = supportFragmentManager
-        val newFragment = MakeChatroomFragment()
-        newFragment.arguments = bundleOf(Pair("key", userData))
-        val transaction = fragmentManager.beginTransaction()
-        transaction.setCustomAnimations(
-            R.anim.enter_from_right,
-            R.anim.do_nothing,
-            R.anim.do_nothing,
-            R.anim.enter_from
-        )
-        transaction.replace(R.id.fragment_container, newFragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
-    }
-
     override fun showError(error: String) {}
 
-    override fun ShowToast(text: String) {}
+    override fun showToast(msg: String) {}
 
     override fun setPresenter(presenter: MainConstract.Presenter) {}
 

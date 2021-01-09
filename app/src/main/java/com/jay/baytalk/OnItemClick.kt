@@ -1,6 +1,6 @@
 package com.jay.baytalk
 
 interface OnItemClick {
-    fun onClick(rid : String ,t : Any, i : Int){}
-    fun onClick2(rid : String, t: Any, x : List<String>){}
+    fun onChatRoomDelete(rid : String)
+    fun onChatroomClick(rid : String, chatName : String, userUids: List<String>)
 }

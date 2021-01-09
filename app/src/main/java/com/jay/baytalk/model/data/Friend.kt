@@ -1,4 +1,4 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.model.data
 
 data class Friend (
     val rid : String?,

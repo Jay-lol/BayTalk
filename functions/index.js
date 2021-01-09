@@ -97,6 +97,7 @@ exports.sendFCM = functions.database.ref('/Message/{}/{pushId}/')
         const msName = snapshot.child('name').val().toString();
         const msMessage = snapshot.child('message').val().toString();
         const msTime = snapshot.child('time').val().toString();
+        const msUid = snapshot.child('userId').val().toString();
         console.log('Name', msName);
         console.log('Time', msMessage);
         const roomName = snapshot.ref.parent.key;   // 방번호가 나옴
@@ -115,9 +116,10 @@ exports.sendFCM = functions.database.ref('/Message/{}/{pushId}/')
             const arrRoomUserList =[];
             if(userRoomSnapShot.hasChildren()){
                 userRoomSnapShot.forEach(snapshot => {
-                    arrRoomUserList.push(snapshot.key);
-                return null}
-                )
+                	if(snapshot.key.toString() !== msUid)
+                    	arrRoomUserList.push(snapshot.key);
+                return null
+            })
             }else{
                 return console.log('RoomUserlist is null')
             }
@@ -129,6 +131,9 @@ exports.sendFCM = functions.database.ref('/Message/{}/{pushId}/')
                     const token = snapshot.val();
                     if (token) {
                         var message = {
+                        	"android":{
+      							"priority":"high"
+    						},
                             data: {
                                 title: msName,
                                 body: msMessage,

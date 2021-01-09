@@ -1,4 +1,4 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,9 +6,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jay.baytalk.OnItemClick
 import com.jay.baytalk.R
+import com.jay.baytalk.model.data.ChatRoom
 import kotlinx.android.synthetic.main.recycler_chatroom.view.*
 
-class RecyclerChatRoomListAdapter(cList : List<ChatRoom>?, listner : OnItemClick) : RecyclerView.Adapter<RecyclerChatRoomListAdapter.cViewH>(){
+class RecyclerChatRoomListAdapter(cList : List<ChatRoom>?, listner : OnItemClick)
+    : RecyclerView.Adapter<RecyclerChatRoomListAdapter.cViewH>(){
 
     private var clist = cList
     private val callback = listner
@@ -39,17 +41,15 @@ class RecyclerChatRoomListAdapter(cList : List<ChatRoom>?, listner : OnItemClick
         chatName: String,
         userUid: List<String>?
     ) {
-        holder.itemView.setOnLongClickListener(object  : View.OnLongClickListener{
-            override fun onLongClick(p0: View?): Boolean {
-                callback.onClick(rid!!, 1, 1)
-                return true
-            }
-        })
-
-        holder.itemView.setOnClickListener {
-            userUid?.let { it1 -> callback.onClick2(rid!!, chatName, it1) }
+        holder.itemView.setOnLongClickListener {
+            if (rid!=null) callback.onChatRoomDelete(rid)
+            true
         }
 
+        holder.itemView.setOnClickListener {
+            userUid?:return@setOnClickListener
+            callback.onChatroomClick(rid!!, chatName, userUid)
+        }
 
     }
 

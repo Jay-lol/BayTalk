@@ -1,4 +1,4 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.model.data
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -14,13 +14,13 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.jay.baytalk.R
-import com.jay.baytalk.static.Companion.mIsInForegroundMode
+import com.jay.baytalk.InfoManager.mIsInForegroundMode
 import com.jay.baytalk.view.MainActivity
 import org.jetbrains.anko.powerManager
+import java.util.*
 
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
-    var x = 0
     /**
      * Called when message is received.
      *
@@ -121,6 +121,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
      * @param messageBody FCM message body received.
      */
     private fun sendNotification(data: MutableMap<String, String>) {
+        val UniqueNumber = (Date().getTime() / 1000L % Int.MAX_VALUE).toInt()
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
@@ -152,13 +153,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        val wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK or
-                PowerManager.ACQUIRE_CAUSES_WAKEUP or
-                PowerManager.ON_AFTER_RELEASE, "My:Tag")
+        val wakeLock = powerManager.newWakeLock(
+            PowerManager.FULL_WAKE_LOCK or
+                    PowerManager.ACQUIRE_CAUSES_WAKEUP or
+                    PowerManager.ON_AFTER_RELEASE, "My:Tag"
+        )
         wakeLock.acquire(5000)
 
-        if(x==999) x = 0
-        notificationManager.notify(x++ /* ID of notification */, notificationBuilder.build())
+        
+        notificationManager.notify(UniqueNumber /* ID of notification */, notificationBuilder.build())
 
     }
 
