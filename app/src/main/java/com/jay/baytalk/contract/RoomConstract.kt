@@ -1,4 +1,4 @@
-package com.jay.baytalk.presenter
+package com.jay.baytalk.contract
 
 import com.jay.baytalk.base.BasePresenter
 import com.jay.baytalk.base.BaseView

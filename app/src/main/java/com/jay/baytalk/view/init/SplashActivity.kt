@@ -1,14 +1,12 @@
-package com.jay.baytalk.view
+package com.jay.baytalk.view.init
 
 import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
-import android.widget.Toast
-import com.jay.baytalk.R
+import androidx.appcompat.app.AppCompatActivity
 import com.jay.baytalk.InfoManager
+import com.jay.baytalk.R
 
 
 class SplashActivity : AppCompatActivity() {
@@ -26,12 +24,12 @@ class SplashActivity : AppCompatActivity() {
             // 21 버전 이상일 때
             window.statusBarColor = Color.BLACK
         }
-        Handler().postDelayed({
-            Toast.makeText(baseContext,"login",Toast.LENGTH_SHORT)
-            finish()
-        }, 2000)
+
+//        Handler().postDelayed({
+//            Toast.makeText(baseContext,"login",Toast.LENGTH_SHORT)
+//            finish()
+//        }, 2000)
 
     }
-
 
 }

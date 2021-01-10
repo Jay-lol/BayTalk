@@ -6,14 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jay.baytalk.adapter.RecyclerMakeRoomListAdapter
-import com.jay.baytalk.base.BaseFragment
-import com.jay.baytalk.extension.showToaster
-import com.jay.baytalk.model.data.Friend
-import com.jay.baytalk.presenter.makechatroom.MakeChatConstract
-import com.jay.baytalk.presenter.makechatroom.MakeChatPresenter
 import com.jay.baytalk.InfoManager.frag
 import com.jay.baytalk.R
+import com.jay.baytalk.adapter.RecyclerMakeRoomListAdapter
+import com.jay.baytalk.base.BaseFragment
+import com.jay.baytalk.contract.MakeChatConstract
+import com.jay.baytalk.extension.showToaster
+import com.jay.baytalk.model.data.Friend
+import com.jay.baytalk.presenter.MakeChatPresenter
 import kotlinx.android.synthetic.main.fragment_make_room.view.*
 
 
@@ -50,8 +50,9 @@ class MakeChatroomFragment : BaseFragment(), MakeChatConstract.View {
         }
     }
 
-    override fun setPresenter(presenter: MakeChatConstract.Presenter) {
-        super.setPresenter(presenter)
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.dropView()
     }
 
     override fun closeView(){

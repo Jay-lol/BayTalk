@@ -13,21 +13,25 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
-import com.jay.baytalk.*
-import com.jay.baytalk.adapter.PageAdapter
-import com.jay.baytalk.base.BaseActivity
-import com.jay.baytalk.presenter.MainConstract
-import com.jay.baytalk.presenter.MainPresenter
+import com.jay.baytalk.InfoManager
 import com.jay.baytalk.InfoManager.frag
 import com.jay.baytalk.InfoManager.loginActivity
 import com.jay.baytalk.InfoManager.userData
 import com.jay.baytalk.InfoManager.userName
+import com.jay.baytalk.R
+import com.jay.baytalk.adapter.PageAdapter
+import com.jay.baytalk.base.BaseActivity
+import com.jay.baytalk.contract.MainConstract
 import com.jay.baytalk.extension.showToaster
+import com.jay.baytalk.presenter.MainPresenter
+import com.jay.baytalk.view.init.LoginActivity
+import com.jay.baytalk.view.init.SplashActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import java.com.jay.baytalk.RTCClient
 
 class MainActivity : BaseActivity(), MainConstract.View {
-    private lateinit var mPresenter: MainPresenter
+
+    private lateinit var mPresenter: MainConstract.Presenter
     private lateinit var functions: FirebaseFunctions
 
     private val CAMERA_PERMISSION = Manifest.permission.CAMERA
@@ -50,8 +54,6 @@ class MainActivity : BaseActivity(), MainConstract.View {
         }
         setContentView(R.layout.activity_main)
         loginActivity?.finish()
-
-        mPresenter.takeView(this)
 
         connectAdapter()
 
@@ -127,8 +129,13 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
     override fun initPresenter() {
         mPresenter = MainPresenter()
+        mPresenter.takeView(this)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        mPresenter.dropView()
+    }
 
     private fun checkCameraPermission() {
         if (ContextCompat.checkSelfPermission(this,
@@ -158,9 +165,9 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
     override fun showError(error: String) {}
 
-    override fun showToast(msg: String) {}
-
-    override fun setPresenter(presenter: MainConstract.Presenter) {}
+    override fun showToast(msg: String) {
+        this.showToaster(msg)
+    }
 
     override fun showLoading() {}
 

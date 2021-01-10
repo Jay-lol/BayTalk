@@ -3,7 +3,6 @@ package com.jay.baytalk.view
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,17 +10,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.jay.baytalk.InfoManager.userData
 import com.jay.baytalk.OnItemClick
 import com.jay.baytalk.R
-import com.jay.baytalk.model.data.ChatRoom
 import com.jay.baytalk.adapter.RecyclerChatRoomListAdapter
+import com.jay.baytalk.base.BaseFragment
+import com.jay.baytalk.contract.RoomListConstract
 import com.jay.baytalk.extension.showToaster
-import com.jay.baytalk.presenter.RoomListConstract
+import com.jay.baytalk.model.data.ChatRoom
+import com.jay.baytalk.presenter.RoomListPresenter
 import kotlinx.android.synthetic.main.fragment_chat.view.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.bundleOf
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.yesButton
 
-class RoomListFragment : Fragment(), RoomListConstract.View, OnItemClick {
+class RoomListFragment : BaseFragment(), RoomListConstract.View, OnItemClick {
 
     private lateinit var mPresenter: RoomListConstract.Presenter
     private var myChatRoomList: List<ChatRoom>? = null
@@ -46,40 +47,18 @@ class RoomListFragment : Fragment(), RoomListConstract.View, OnItemClick {
         return view
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        Log.d(TAG, "onActivityCreated")
+    override fun initPresenter() {
+        mPresenter = RoomListPresenter()
+        mPresenter.takeView(this)
     }
 
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "onStart")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "onResume")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "onStop")
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mPresenter.dropView()
     }
 
     private fun setUpButton(view: View?) {
         view?.makeChatRoom?.setOnClickListener {
-    //            val databasefe = Firebase.database
-    //            var myReffe = databasefe.getReference("message")
-    //            val ll = ChatRoom("make","더존","단톡방")
-    //            val zz = mapOf<String,String>(Pair("ket","pp"))
-    ////            myReffe.child("abcdefg").push().setValue(zz)  //abc아래 랜덤 아래 zz값들
-    //            myReffe.child("zxcvb").push().setValue(true)
-    //            myReffe.child("zxzxcvb").push().setValue("abc")
             makeRoom()
         }
     }
@@ -115,10 +94,6 @@ class RoomListFragment : Fragment(), RoomListConstract.View, OnItemClick {
 
     override fun showToast(msg: String) {
         this.showToaster(msg)
-    }
-
-    override fun setPresenter(presenter: RoomListConstract.Presenter) {
-        mPresenter = presenter
     }
 
     override fun onChatRoomDelete(rid: String) {

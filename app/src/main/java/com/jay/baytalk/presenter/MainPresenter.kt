@@ -2,18 +2,14 @@ package com.jay.baytalk.presenter
 
 import android.content.Context
 import android.util.Log
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.iid.FirebaseInstanceId
-import com.google.firebase.ktx.Firebase
-import com.jay.baytalk.R
+import com.jay.baytalk.contract.MainConstract
 import com.jay.baytalk.model.ChatRoomList
 import com.jay.baytalk.model.FriendList
 
 class MainPresenter : MainConstract.Presenter {
     private var searchView : MainConstract.View? = null
-    private val TAG = "MainPresenter"
-
+    private val TAG: String = "로그 ${this.javaClass.simpleName}"
 
     override fun welcome(currentUser: FirebaseUser) {
         FriendList.loadMyInfo(currentUser){ name ->
@@ -25,23 +21,15 @@ class MainPresenter : MainConstract.Presenter {
         searchView = view
     }
 
-    fun setFcm(context: Context) {
-        FirebaseInstanceId.getInstance().instanceId
-            .addOnCompleteListener(OnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Log.w(TAG, "getInstanceId failed", task.exception)
-                    return@OnCompleteListener
-                }
+    override fun dropView() {
+        searchView = null
+    }
 
-                // Get new Instance ID token
-                val token = task.result?.token
-
-                // Log and toast
-                val msg = context.getString(R.string.msg_token_fmt, token)
-                Log.d(TAG, msg)
-                token?.let{ChatRoomList.sendFcmId(it)}
-
-            })
+    override fun setFcm(context: Context) {
+        ChatRoomList.setFcm(context){ result ->
+            if (result) Log.d(TAG, "Fcm등록 성공")
+            else Log.d(TAG, "Fcm등록 실패")
+        }
     }
 
 

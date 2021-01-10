@@ -13,8 +13,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.jay.baytalk.R
 import com.jay.baytalk.InfoManager.mIsInForegroundMode
+import com.jay.baytalk.R
 import com.jay.baytalk.view.MainActivity
 import org.jetbrains.anko.powerManager
 import java.util.*

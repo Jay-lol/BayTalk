@@ -1,26 +1,30 @@
 package com.jay.baytalk.presenter
 
-import android.util.Log
-import com.jay.baytalk.model.data.Friend
+import com.jay.baytalk.contract.FriendConstract
 import com.jay.baytalk.model.FriendList
 
-class FriendPresenter(view: FriendConstract.View) : FriendConstract.Presenter {
-    private val searchView: FriendConstract.View = view
+class FriendPresenter : FriendConstract.Presenter {
+    private var searchView: FriendConstract.View? = null
     private val TAG = "로그"
 
-    init {
-        searchView.setPresenter(this)
-    }
-
     override fun buttonClickAction() {
-        searchView.showToast("Success")
+        searchView?.showToast("Success")
     }
 
     override fun getFriendList() {
         FriendList.loadFriend { value ->
             value?:return@loadFriend
-            searchView.loadFriendList(value)
+            searchView?.loadFriendList(value)
         }
+    }
+
+    override fun takeView(view: FriendConstract.View) {
+        searchView = view
+    }
+
+    override fun dropView() {
+        searchView = null
+        FriendList.removeListener()
     }
 }
 

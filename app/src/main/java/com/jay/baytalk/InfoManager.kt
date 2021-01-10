@@ -1,9 +1,9 @@
 package com.jay.baytalk
 
-import com.jay.baytalk.view.LoginActivity
 import com.jay.baytalk.view.MainActivity
 import com.jay.baytalk.view.MakeChatroomFragment
-import com.jay.baytalk.view.SplashActivity
+import com.jay.baytalk.view.init.LoginActivity
+import com.jay.baytalk.view.init.SplashActivity
 
 object InfoManager {
     var mainActivity: MainActivity? = null

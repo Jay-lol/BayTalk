@@ -1,6 +1,7 @@
 package com.jay.baytalk.presenter
 
 import android.util.Log
+import com.jay.baytalk.contract.RoomConstract
 import com.jay.baytalk.model.MessageList
 
 class RoomPresenter : RoomConstract.Presenter {
@@ -26,4 +27,8 @@ class RoomPresenter : RoomConstract.Presenter {
         searchView = view
     }
 
+    override fun dropView() {
+        searchView = null
+        MessageList.removeListener()
+    }
 }

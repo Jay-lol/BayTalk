@@ -6,26 +6,28 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.InfoManager
-import com.jay.baytalk.model.data.Friend
-import com.jay.baytalk.adapter.RecyclerFriendListAdapter
-import com.jay.baytalk.presenter.FriendConstract
 import com.jay.baytalk.InfoManager.userName
 import com.jay.baytalk.R
+import com.jay.baytalk.adapter.RecyclerFriendListAdapter
+import com.jay.baytalk.base.BaseFragment
+import com.jay.baytalk.contract.FriendConstract
+import com.jay.baytalk.extension.showToaster
+import com.jay.baytalk.model.data.Friend
+import com.jay.baytalk.presenter.FriendPresenter
+import com.jay.baytalk.view.init.LoginActivity
 import kotlinx.android.synthetic.main.fragment_friend.view.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.yesButton
 
 
-class FriendFragment : Fragment(), FriendConstract.View {
+class FriendFragment : BaseFragment(), FriendConstract.View {
 
-    private var mPresenter: FriendConstract.Presenter? = null
+    private lateinit var mPresenter: FriendConstract.Presenter
     private var friendList: List<Friend>? = null
     private var fAdapter: RecyclerFriendListAdapter? = null
     private val TAG = "FriendFragment"
@@ -50,7 +52,7 @@ class FriendFragment : Fragment(), FriendConstract.View {
     }
 
     private fun loadFriends() {
-        mPresenter?.getFriendList()
+        mPresenter.getFriendList()
     }
 
     override fun loadFriendList(value : List<Friend>){
@@ -72,7 +74,7 @@ class FriendFragment : Fragment(), FriendConstract.View {
 
                 }
             }?.show()
-            mPresenter?.buttonClickAction()
+            mPresenter.buttonClickAction()
         }
 
     }
@@ -85,13 +87,19 @@ class FriendFragment : Fragment(), FriendConstract.View {
         Log.d("showError", error)
     }
 
-    override fun showToast(text: String) {
-        Log.d("is clicked?", "ShowToast")
-        Toast.makeText(activity, text, Toast.LENGTH_SHORT).show()
+    override fun showToast(msg: String) {
+        Log.d(TAG, "is clicked? showToast")
+        this.showToaster(msg)
     }
 
-    override fun setPresenter(presenter: FriendConstract.Presenter) {
-        mPresenter = presenter
+    override fun initPresenter() {
+        mPresenter = FriendPresenter()
+        mPresenter.takeView(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mPresenter.dropView()
     }
 
 }

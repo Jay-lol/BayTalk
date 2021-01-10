@@ -1,26 +1,31 @@
 package com.jay.baytalk.model
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.ktx.Firebase
+import com.jay.baytalk.R
 import com.jay.baytalk.model.data.ChatRoom
 
 object ChatRoomList {
-    private val TAG = "ChatRoomList"
-    val database = Firebase.database
+    private val TAG = "로그 ${this.javaClass.simpleName}"
+    private val database = Firebase.database
     private lateinit var myRef: DatabaseReference
+    private var job : ValueEventListener? = null
     fun getChatRoomList(callback: (MutableList<ChatRoom>) -> Unit) {
 
         myRef = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}")
 
-        myRef.addValueEventListener(object : ValueEventListener {
+        job = myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.children
                 val chatRoomList = mutableListOf<ChatRoom>()
@@ -67,9 +72,33 @@ object ChatRoomList {
         })
     }
 
+    fun removeListener() {
+        job?:return
+        myRef.removeEventListener(job!!)
+    }
+
     fun sendFcmId(fcm: String) {
         myRef = database.getReference("FcmId/${Firebase.auth.currentUser?.uid}")
         myRef.setValue(fcm)
+    }
+
+    fun setFcm(context : Context, callback : (Boolean) -> Unit){
+        FirebaseInstanceId.getInstance().instanceId
+            .addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w(TAG, "getInstanceId failed", task.exception)
+                    callback(false)
+                    return@OnCompleteListener
+                }
+                task.result?:return@OnCompleteListener
+                // Get new Instance ID token
+                val token = task.result!!.token
+                // Log and toast
+                val msg = context.getString(R.string.msg_token_fmt, token)
+                Log.d(TAG, msg)
+                sendFcmId(token)
+                callback(true)
+            })
     }
 
     fun showError(error: String) {

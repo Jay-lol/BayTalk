@@ -1,4 +1,4 @@
-package com.jay.baytalk.view
+package com.jay.baytalk.view.init
 
 import android.app.ProgressDialog
 import android.os.Bundle
@@ -8,9 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
-import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.R
 import kotlinx.android.synthetic.main.activity_register.*

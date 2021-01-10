@@ -15,7 +15,7 @@
         <activity android:name=".view.RoomActivity"
                   android:windowSoftInputMode="adjustPan">
         </activity>
-        <activity android:name=".view.RegisterActivity">
+        <activity android:name=".view.init.RegisterActivity">
         </activity>
         <activity android:name=".view.MainActivity"
         android:launchMode="singleTask">
@@ -25,9 +25,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".view.SplashActivity">
+        <activity android:name=".view.init.SplashActivity">
         </activity>
-        <activity android:name=".view.LoginActivity">
+        <activity android:name=".view.init.LoginActivity">
         </activity>
         <service
                 android:name=".model.data.MyFirebaseMessagingService"

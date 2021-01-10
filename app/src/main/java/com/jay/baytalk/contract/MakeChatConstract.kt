@@ -1,4 +1,4 @@
-package com.jay.baytalk.presenter.makechatroom
+package com.jay.baytalk.contract
 
 import com.jay.baytalk.base.BasePresenter
 import com.jay.baytalk.base.BaseView

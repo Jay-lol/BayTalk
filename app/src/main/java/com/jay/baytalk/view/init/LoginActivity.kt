@@ -1,4 +1,4 @@
-package com.jay.baytalk.view
+package com.jay.baytalk.view.init
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -8,13 +8,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.jay.baytalk.R
 import com.jay.baytalk.InfoManager
 import com.jay.baytalk.InfoManager.loginActivity
+import com.jay.baytalk.R
+import com.jay.baytalk.view.MainActivity
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
     private val TAG = "LoginActivity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)

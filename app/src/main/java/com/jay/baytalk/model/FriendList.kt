@@ -12,16 +12,17 @@ import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.model.data.Friend
 
 object FriendList {
-    private val TAG = "로그"
+    private val TAG = "로그 ${javaClass.simpleName}"
     private lateinit var friendList : MutableList<Friend>
     private val database = Firebase.database
     private var myRef = database.getReference("Users")
+    private var job : ValueEventListener? = null
     val myUid = Firebase.auth.currentUser?.uid
 
     fun loadFriend(callback : (List<Friend>?) -> Unit) {
         // Read from the database
-        myRef = database.getReference("Users")
-        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        val myLoadRef = database.getReference("Users")
+        myLoadRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.children
                 friendList = mutableListOf()
@@ -65,7 +66,7 @@ object FriendList {
         // Read from the database
 
         //addValueEventListener를 활용하여 채팅방을 구현해야한다.  onDataChange는 데이터가 변경될 때마다 호출되기 때문
-        myRef.addValueEventListener(object : ValueEventListener {
+        job = myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
@@ -81,5 +82,9 @@ object FriendList {
         })
     }
 
+    fun removeListener(){
+        job?:return
+        myRef.removeEventListener(job!!)
+    }
 }
 
