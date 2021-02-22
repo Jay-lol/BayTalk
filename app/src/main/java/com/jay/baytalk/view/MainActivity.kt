@@ -72,7 +72,7 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
     private fun connectAdapter() {
         val adapter = PageAdapter(supportFragmentManager)
-        adapter.addItem(FriendFragment())
+        adapter.addItem(FriendListFragment())
         adapter.addItem(RoomListFragment())
         main_viewPager.adapter = adapter
         main_tabLayout.setupWithViewPager(main_viewPager)

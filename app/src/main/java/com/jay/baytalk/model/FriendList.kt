@@ -11,35 +11,37 @@ import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.model.data.Friend
 
-object FriendList {
+class FriendList {
     private val TAG = "로그 ${javaClass.simpleName}"
-    private lateinit var friendList : MutableList<Friend>
+    private lateinit var friendList: MutableList<Friend>
     private val database = Firebase.database
     private var myRef = database.getReference("Users")
-    private var job : ValueEventListener? = null
+    private var job: ValueEventListener? = null
     val myUid = Firebase.auth.currentUser?.uid
 
-    fun loadFriend(callback : (List<Friend>?) -> Unit) {
+    fun loadFriend(callback: (List<Friend>?) -> Unit) {
         // Read from the database
         val myLoadRef = database.getReference("Users")
         myLoadRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.children
                 friendList = mutableListOf()
-                var myData : Friend? = null
+                var myData: Friend? = null
                 for (x in value) {
                     if (myUid == x.key) {
                         myData = Friend(
-                                x.key, x.child("name").value as String
-                                , x.child("statusMessage").value as String
-                                , false
-                            )
+                            x.key,
+                            x.child("name").value as String,
+                            x.child("statusMessage").value as String,
+                            false
+                        )
                     } else {
                         friendList.add(
                             Friend(
-                                x.key, x.child("name").value as String
-                                , x.child("statusMessage").value as String
-                                , false
+                                x.key,
+                                x.child("name").value as String,
+                                x.child("statusMessage").value as String,
+                                false
                             )
                         )
                         //displays the key for the node
@@ -47,7 +49,7 @@ object FriendList {
                         Log.d(TAG, "${x.key} ${x.child("statusMessage").value}")
                     }
                 }
-                myData?:return
+                myData ?: return
                 friendList = friendList.sortedWith(compareBy { it.name }).toMutableList()
                 friendList.add(0, myData)
                 callback(friendList)
@@ -71,7 +73,7 @@ object FriendList {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 val value = dataSnapshot.getValue<String>()
-                value?:return
+                value ?: return
                 callback(value)
             }
 
@@ -82,9 +84,8 @@ object FriendList {
         })
     }
 
-    fun removeListener(){
-        job?:return
+    fun removeListener() {
+        job ?: return
         myRef.removeEventListener(job!!)
     }
 }
-
