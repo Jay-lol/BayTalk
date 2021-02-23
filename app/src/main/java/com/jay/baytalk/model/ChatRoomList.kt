@@ -16,11 +16,22 @@ import com.google.firebase.ktx.Firebase
 import com.jay.baytalk.R
 import com.jay.baytalk.model.data.ChatRoom
 
-object ChatRoomList {
+class ChatRoomList {
     private val TAG = "로그 ${this.javaClass.simpleName}"
     private val database = Firebase.database
     private lateinit var myRef: DatabaseReference
     private var job : ValueEventListener? = null
+
+    /**
+     * 키값 상수화
+     */
+    private val ROOM_ID = "roomId"
+    private val USER_UID = "userUid"
+    private val USER_NAME = "userName"
+    private val ROOM_TYPE = "roomType"
+    private val LASTMESSAGE = "lastMessage"
+    private val LAST_CHAT_TIME = "time"
+
     fun getChatRoomList(callback: (MutableList<ChatRoom>) -> Unit) {
 
         myRef = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}")
@@ -32,12 +43,12 @@ object ChatRoomList {
                 for (x in value) {
                     chatRoomList.add(
                         ChatRoom(
-                            x.child("roomId").value as String,
-                            x.child("userName").value as String,
-                            x.child("roomType").value as String,
-                            x.child("lastMessage").value as String,
-                            x.child("time").value as Long,
-                            x.child("userUid").value as List<String>
+                            x.child(ROOM_ID).value as String,
+                            x.child(USER_NAME).value as String,
+                            x.child(ROOM_TYPE).value as String,
+                            x.child(LASTMESSAGE).value as String,
+                            x.child(LAST_CHAT_TIME).value as Long,
+                            x.child(USER_UID).value as List<String>
                         )
                     )
                 }
@@ -125,12 +136,12 @@ object ChatRoomList {
                 for (i in list) {
                     myRef = database.getReference("RoomUser/${i[0]}/$roomName")
                     val hashMap: HashMap<String, Any> = HashMap()
-                    hashMap["lastMessage"] = " "
-                    hashMap["roomId"] = roomName
-                    if (size > 2) hashMap["roomType"] = "Group" else hashMap["roomType"] = "Private"
-                    hashMap["time"] = nTime
-                    hashMap["userName"] = userNameList
-                    hashMap["userUid"] = nameList
+                    hashMap[LASTMESSAGE] = " "
+                    hashMap[ROOM_ID] = roomName
+                    if (size > 2) hashMap[ROOM_TYPE] = "Group" else hashMap[ROOM_TYPE] = "Private"
+                    hashMap[LAST_CHAT_TIME] = nTime
+                    hashMap[USER_NAME] = userNameList
+                    hashMap[USER_UID] = nameList
                     myRef.setValue(hashMap)
                 }
 
@@ -142,7 +153,6 @@ object ChatRoomList {
                     callback(true)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "makeChatroom: ")
                 Handler(Looper.getMainLooper()).post{
                     callback(false)
                 }

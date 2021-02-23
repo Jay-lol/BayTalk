@@ -2,68 +2,77 @@ package com.jay.baytalk.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jay.baytalk.InfoManager.userData
 import com.jay.baytalk.OnItemClick
 import com.jay.baytalk.R
 import com.jay.baytalk.adapter.RecyclerChatRoomListAdapter
-import com.jay.baytalk.base.BaseFragment
-import com.jay.baytalk.contract.RoomListConstract
-import com.jay.baytalk.extension.showToaster
+import com.jay.baytalk.databinding.FragmentRoomBinding
 import com.jay.baytalk.model.data.ChatRoom
-import com.jay.baytalk.presenter.RoomListPresenter
-import kotlinx.android.synthetic.main.fragment_chat.view.*
+import com.jay.baytalk.viewmodel.FriendAndRoomListViewModel
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.bundleOf
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.yesButton
 
-class RoomListFragment : BaseFragment(), RoomListConstract.View, OnItemClick {
+class RoomListFragment : Fragment(), OnItemClick {
 
-    private lateinit var mPresenter: RoomListConstract.Presenter
-    private var myChatRoomList: List<ChatRoom>? = null
-    private var cAdapter: RecyclerChatRoomListAdapter? = null
-    private val TAG = "ChatroomFragment"
+    private var chatRoomList : List<ChatRoom>? = null
+    private var chatRoomListAdapter: RecyclerChatRoomListAdapter? = null
+    private val  TAG : String = "로그 ${this.javaClass.simpleName}"
+    private lateinit var binding : FragmentRoomBinding
+    private lateinit var friendAndRoomListViewModel : FriendAndRoomListViewModel
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        friendAndRoomListViewModel = ViewModelProvider(this).get(FriendAndRoomListViewModel::class.java)
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        Log.d(TAG, "onCreateView")
-        val view = inflater.inflate(R.layout.fragment_chat, container, false)
+    ): View {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_room, container, false)
+        binding.lifecycleOwner = this
+        binding.roomFg = this
 
-        view.recyclerViewChatRoom.layoutManager = LinearLayoutManager(requireContext())
-        cAdapter = RecyclerChatRoomListAdapter(myChatRoomList, this)
-        view.recyclerViewChatRoom.adapter = cAdapter
-
+        setAdapter()
         loadRoom()
+        observeViewModels()
 
-        setUpButton(view)
-
-        return view
+        return binding.root
     }
 
-    override fun initPresenter() {
-        mPresenter = RoomListPresenter()
-        mPresenter.takeView(this)
+    /**
+     * chatRoomList를  livedata를 관찰해서 가져온다.
+     */
+    private fun observeViewModels() {
+        friendAndRoomListViewModel.chatRoomListLiveData.observe(viewLifecycleOwner , Observer { roomListValues ->
+            chatRoomList = roomListValues
+            chatRoomList?.let { list ->
+                chatRoomListAdapter?.refresh(list)
+                chatRoomListAdapter?.notifyDataSetChanged()
+            }
+        })
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mPresenter.dropView()
+    private fun loadRoom() {
+        friendAndRoomListViewModel.getChatList()
     }
 
-    private fun setUpButton(view: View?) {
-        view?.makeChatRoom?.setOnClickListener {
-            makeRoom()
-        }
+    private fun setAdapter() {
+        binding.recyclerViewChatRoom.layoutManager = LinearLayoutManager(requireContext())
+        chatRoomListAdapter = RecyclerChatRoomListAdapter(chatRoomList, this)
+        binding.recyclerViewChatRoom.adapter = chatRoomListAdapter
     }
 
-    private fun makeRoom(){
+    fun makeRoom(){
         val fragmentManager = requireActivity().supportFragmentManager
         val newFragment = MakeChatroomFragment()
         newFragment.arguments = bundleOf(Pair("key", userData))
@@ -79,27 +88,10 @@ class RoomListFragment : BaseFragment(), RoomListConstract.View, OnItemClick {
         transaction.commit()
     }
 
-    private fun loadRoom() {
-        mPresenter.getChatList()
-    }
-
-    override fun showList(list: MutableList<ChatRoom>) {
-        cAdapter!!.refresh(list)
-        cAdapter!!.notifyDataSetChanged()
-    }
-
-    override fun showError(error: String) {
-        Log.d("showError", error)
-    }
-
-    override fun showToast(msg: String) {
-        this.showToaster(msg)
-    }
-
     override fun onChatRoomDelete(rid: String) {
         activity?.alert("채팅방을 나가시겠습니까??", "나가기") {
             yesButton {
-                mPresenter.deleteChatRoom(rid)
+                friendAndRoomListViewModel.deleteChatRoom(rid)
             }
             noButton {
             }
