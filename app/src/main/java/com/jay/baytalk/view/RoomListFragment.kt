@@ -32,7 +32,7 @@ class RoomListFragment : Fragment(), OnItemClick {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        friendAndRoomListViewModel = ViewModelProvider(this).get(FriendAndRoomListViewModel::class.java)
+        friendAndRoomListViewModel = ViewModelProvider(requireActivity()).get(FriendAndRoomListViewModel::class.java)
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -2,7 +2,6 @@ package com.jay.baytalk.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,11 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.jay.baytalk.InfoManager
 import com.jay.baytalk.InfoManager.userName
 import com.jay.baytalk.R
 import com.jay.baytalk.adapter.RecyclerFriendListAdapter
-import com.jay.baytalk.contract.FriendConstract
 import com.jay.baytalk.databinding.FragmentFriendBinding
 import com.jay.baytalk.extension.showToaster
 import com.jay.baytalk.model.data.Friend
@@ -30,15 +27,14 @@ import org.jetbrains.anko.yesButton
 
 class FriendListFragment : Fragment() {
 
-    private lateinit var mPresenter: FriendConstract.Presenter
     private var friendList: List<Friend>? = null
-    private lateinit var fAdapter: RecyclerFriendListAdapter
+    private lateinit var friendListAdapter: RecyclerFriendListAdapter
     private val  TAG : String = "로그 ${this.javaClass.simpleName}"
     private lateinit var friendAndRoomListViewModel : FriendAndRoomListViewModel
     private lateinit var binding : FragmentFriendBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        friendAndRoomListViewModel = ViewModelProvider(this).get(FriendAndRoomListViewModel::class.java)
+        friendAndRoomListViewModel = ViewModelProvider(requireActivity()).get(FriendAndRoomListViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -57,8 +53,8 @@ class FriendListFragment : Fragment() {
 
     private fun setAdapter() {
         binding.friendListRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        fAdapter = RecyclerFriendListAdapter(friendList)
-        binding.friendListRecyclerView.adapter = fAdapter
+        friendListAdapter = RecyclerFriendListAdapter(friendList)
+        binding.friendListRecyclerView.adapter = friendListAdapter
     }
 
     /**
@@ -68,8 +64,8 @@ class FriendListFragment : Fragment() {
         friendAndRoomListViewModel.friendListLiveData.observe(viewLifecycleOwner , Observer { friendListValues ->
             friendList = friendListValues
             friendList?.let { list ->
-                fAdapter.refreshFriendList(list)
-                fAdapter.notifyDataSetChanged()
+                friendListAdapter.refreshFriendList(list)
+                friendListAdapter.notifyDataSetChanged()
             }
 //            friendList?:return@Observer
 //            fAdapter.refreshFriendList(friendList!!)

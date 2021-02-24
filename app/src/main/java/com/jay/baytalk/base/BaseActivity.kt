@@ -20,9 +20,6 @@ abstract class BaseActivity : AppCompatActivity() {
             // 21 버전 이상일 때
             window.statusBarColor = Color.BLACK
         }
-        initPresenter()
     }
-
-    abstract fun initPresenter()
 
 }
