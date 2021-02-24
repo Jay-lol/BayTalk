@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.tasks.Task
@@ -22,9 +23,9 @@ import com.jay.baytalk.InfoManager.userData
 import com.jay.baytalk.InfoManager.userName
 import com.jay.baytalk.R
 import com.jay.baytalk.adapter.PageAdapter
-import com.jay.baytalk.base.BaseActivity
+import com.jay.baytalk.BaseActivity
 import com.jay.baytalk.databinding.ActivityMainBinding
-import com.jay.baytalk.extension.showToaster
+import com.jay.baytalk.extension.showToast
 import com.jay.baytalk.view.init.LoginActivity
 import com.jay.baytalk.view.init.SplashActivity
 import com.jay.baytalk.viewmodel.FriendAndRoomListViewModel
@@ -49,6 +50,7 @@ class MainActivity : BaseActivity() {
             ViewModelProvider(this).get(FriendAndRoomListViewModel::class.java)
         InfoManager.mainActivity = this
         InfoManager.mIsInForegroundMode = true
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.lifecycleOwner = this
         binding.mainActivity = this
         auth.currentUser
@@ -59,7 +61,6 @@ class MainActivity : BaseActivity() {
             finish()
             return
         }
-        setContentView(R.layout.activity_main)
         loginActivity?.finish()
 
         connectAdapter()
@@ -78,7 +79,7 @@ class MainActivity : BaseActivity() {
     private fun observeViewModels() {
         friendAndRoomListViewModel.myNameData.observe(this, Observer{ name ->
             userName = name
-            this.showToaster("${userName}님 환영합니다")
+            this.showToast("${userName}님 환영합니다")
             userData = arrayListOf(auth.currentUser!!.uid, userName!!)
         })
     }
@@ -86,7 +87,7 @@ class MainActivity : BaseActivity() {
         currentUser ?: return
         friendAndRoomListViewModel.loadMyName(currentUser)
     }
-
+    
     private fun setFcm() {
         friendAndRoomListViewModel.setFcm()
     }

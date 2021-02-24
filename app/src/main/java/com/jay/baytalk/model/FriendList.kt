@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
@@ -15,14 +16,19 @@ class FriendList {
     private val TAG = "로그 ${javaClass.simpleName}"
     private lateinit var friendList: MutableList<Friend>
     private val database = Firebase.database
-    private var myRef = database.getReference("Users")
     private var job: ValueEventListener? = null
     val myUid = Firebase.auth.currentUser?.uid
 
+    /**
+     * 키값 상수화
+     */
+    private val NAME = "name"
+    private val STATUS_MESSAGE = "statusMessage"
+
     fun loadFriend(callback: (List<Friend>?) -> Unit) {
         // Read from the database
-        val myLoadRef = database.getReference("Users")
-        myLoadRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        val loadFriendRef = database.getReference("Users")
+        loadFriendRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.children
                 friendList = mutableListOf()
@@ -31,22 +37,22 @@ class FriendList {
                     if (myUid == x.key) {
                         myData = Friend(
                             x.key,
-                            x.child("name").value as String,
-                            x.child("statusMessage").value as String,
+                            x.child(NAME).value as String,
+                            x.child(STATUS_MESSAGE).value as String,
                             false
                         )
                     } else {
                         friendList.add(
                             Friend(
                                 x.key,
-                                x.child("name").value as String,
-                                x.child("statusMessage").value as String,
+                                x.child(NAME).value as String,
+                                x.child(STATUS_MESSAGE).value as String,
                                 false
                             )
                         )
                         //displays the key for the node
                         //gives the value for given keyname
-                        Log.d(TAG, "${x.key} ${x.child("statusMessage").value}")
+                        Log.d(TAG, "${x.key} ${x.child(STATUS_MESSAGE).value}")
                     }
                 }
                 myData ?: return
@@ -63,12 +69,13 @@ class FriendList {
 
     }
 
+    private lateinit var myInfoRef : DatabaseReference
     fun loadMyInfo(currentUser: FirebaseUser, callback: (String) -> Unit) {
-        myRef = database.getReference("Users/${currentUser.uid}/name")
+        myInfoRef = database.getReference("Users/${currentUser.uid}/name")
         // Read from the database
 
         //addValueEventListener를 활용하여 채팅방을 구현해야한다.  onDataChange는 데이터가 변경될 때마다 호출되기 때문
-        job = myRef.addValueEventListener(object : ValueEventListener {
+        job = myInfoRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
@@ -86,6 +93,6 @@ class FriendList {
 
     fun removeListener() {
         job ?: return
-        myRef.removeEventListener(job!!)
+        myInfoRef.removeEventListener(job!!)
     }
 }
