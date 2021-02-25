@@ -14,7 +14,7 @@ import com.jay.baytalk.InfoManager.frag
 import com.jay.baytalk.R
 import com.jay.baytalk.adapter.RecyclerMakeRoomListAdapter
 import com.jay.baytalk.databinding.FragmentMakeRoomBinding
-import com.jay.baytalk.extension.showToaster
+import com.jay.baytalk.extension.showToast
 import com.jay.baytalk.model.data.Friend
 import com.jay.baytalk.viewmodel.FriendAndRoomListViewModel
 
@@ -26,6 +26,8 @@ class MakeChatroomFragment : Fragment() {
     private var inviteList = mutableListOf<List<String>>()
     private lateinit var binding: FragmentMakeRoomBinding
     private lateinit var friendAndRoomListViewModel: FriendAndRoomListViewModel
+
+    private val MY_PERSONAL_KEY = "key"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +57,7 @@ class MakeChatroomFragment : Fragment() {
     private fun observeViewModels() {
         friendAndRoomListViewModel.inviteSuccessMessage.observe(viewLifecycleOwner , Observer { successMessage ->
             if (successMessage=="INIT") return@Observer
-            this.showToaster(successMessage)
+            this.showToast(successMessage)
             closeView()
         })
         friendAndRoomListViewModel.friendListLiveData.observe(viewLifecycleOwner , Observer { friendListValues ->
@@ -67,7 +69,7 @@ class MakeChatroomFragment : Fragment() {
         val size = inviteList.size
         if (size <= 1) {
            Log.d(TAG, "inviteButton() called 아무도 선택 안할 경우")
-            this.showToaster("최소 1명은 선택하세요!!")
+            this.showToast("최소 1명은 선택하세요!!")
             return
         }
         friendAndRoomListViewModel.inviteFriend(inviteList)
@@ -90,10 +92,11 @@ class MakeChatroomFragment : Fragment() {
         binding.recyclerViewMakeroom.adapter = mAdapter
         // 자기자신도 추가
         val bundle = arguments
-        bundle?.getStringArrayList("key") ?: return
-        Log.d(TAG, bundle.getStringArrayList("key")!![0].toString())
-        val mydata = bundle.getStringArrayList("key")!!
-        inviteList.add(listOf(mydata[0], mydata[1]))
+        bundle?.getStringArrayList(MY_PERSONAL_KEY) ?: return
+        bundle.getStringArrayList(MY_PERSONAL_KEY)?.let{ myData ->
+            Log.d(TAG, myData[0])
+            inviteList.add(listOf(myData[0], myData[1]))
+        }
     }
 
 }

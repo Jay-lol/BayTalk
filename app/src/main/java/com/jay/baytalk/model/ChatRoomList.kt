@@ -1,6 +1,5 @@
 package com.jay.baytalk.model
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -13,14 +12,13 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.ktx.Firebase
-import com.jay.baytalk.R
 import com.jay.baytalk.model.data.ChatRoom
 
 class ChatRoomList {
     private val TAG = "로그 ${this.javaClass.simpleName}"
     private val database = Firebase.database
-    private lateinit var myRef: DatabaseReference
-    private var job : ValueEventListener? = null
+    private lateinit var databaseReference: DatabaseReference
+    private var job: ValueEventListener? = null
 
     /**
      * 키값 상수화
@@ -34,9 +32,9 @@ class ChatRoomList {
 
     fun getChatRoomList(callback: (MutableList<ChatRoom>) -> Unit) {
 
-        myRef = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}")
+        databaseReference = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}")
 
-        job = myRef.addValueEventListener(object : ValueEventListener {
+        job = databaseReference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val value = snapshot.children
                 val chatRoomList = mutableListOf<ChatRoom>()
@@ -63,11 +61,11 @@ class ChatRoomList {
     }
 
     fun deleteChatRoomList(rid: String, callback: (Boolean) -> Unit) {
-        myRef = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}/$rid")
+        databaseReference = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}/$rid")
 
-        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val job = myRef.removeValue()
+                val job = databaseReference.removeValue()
                 job.addOnCompleteListener {
                     if (it.isComplete)
                         callback(true)
@@ -76,6 +74,7 @@ class ChatRoomList {
                     callback(false)
                 }
             }
+
             override fun onCancelled(error: DatabaseError) {
                 showError("DataLoading Error")
                 callback(false)
@@ -84,16 +83,17 @@ class ChatRoomList {
     }
 
     fun removeListener() {
-        job?:return
-        myRef.removeEventListener(job!!)
+        job?.let { listener ->
+            databaseReference.removeEventListener(listener)
+        }
     }
 
     fun sendFcmId(fcm: String) {
-        myRef = database.getReference("FcmId/${Firebase.auth.currentUser?.uid}")
-        myRef.setValue(fcm)
+        databaseReference = database.getReference("FcmId/${Firebase.auth.currentUser?.uid}")
+        databaseReference.setValue(fcm)
     }
 
-    fun setFcm(context : Context, callback : (Boolean) -> Unit){
+    fun setFcm(callback: (Boolean) -> Unit) {
         FirebaseInstanceId.getInstance().instanceId
             .addOnCompleteListener(OnCompleteListener { task ->
                 if (!task.isSuccessful) {
@@ -101,14 +101,14 @@ class ChatRoomList {
                     callback(false)
                     return@OnCompleteListener
                 }
-                task.result?:return@OnCompleteListener
-                // Get new Instance ID token
-                val token = task.result!!.token
-                // Log and toast
-                val msg = context.getString(R.string.msg_token_fmt, token)
-                Log.d(TAG, msg)
-                sendFcmId(token)
-                callback(true)
+                task.result?.let { instanceIdResult ->
+                    // Get new Instance ID token
+                    val token = instanceIdResult.token
+                    // Log and toast
+                    Log.d(TAG, token)
+                    sendFcmId(token)
+                    callback(true)
+                }
             })
     }
 
@@ -131,32 +131,24 @@ class ChatRoomList {
             nameList.add(list[i][0])
         }
 
-        Thread {
-            try {
-                for (i in list) {
-                    myRef = database.getReference("RoomUser/${i[0]}/$roomName")
-                    val hashMap: HashMap<String, Any> = HashMap()
-                    hashMap[LASTMESSAGE] = " "
-                    hashMap[ROOM_ID] = roomName
-                    if (size > 2) hashMap[ROOM_TYPE] = "Group" else hashMap[ROOM_TYPE] = "Private"
-                    hashMap[LAST_CHAT_TIME] = nTime
-                    hashMap[USER_NAME] = userNameList
-                    hashMap[USER_UID] = nameList
-                    myRef.setValue(hashMap)
-                }
+        for (i in list) {
+            databaseReference = database.getReference("RoomUser/${i[0]}/$roomName")
+            val hashMap: HashMap<String, Any> = HashMap()
+            hashMap[LASTMESSAGE] = " "
+            hashMap[ROOM_ID] = roomName
+            if (size > 2) hashMap[ROOM_TYPE] = "Group" else hashMap[ROOM_TYPE] = "Private"
+            hashMap[LAST_CHAT_TIME] = nTime
+            hashMap[USER_NAME] = userNameList
+            hashMap[USER_UID] = nameList
+            databaseReference.setValue(hashMap)
+        }
 
-                for (name in nameList) {
-                    myRef = database.getReference("UserInRoom/$roomName/$name")
-                    myRef.setValue(true)
-                }
-                Handler(Looper.getMainLooper()).post{
-                    callback(true)
-                }
-            } catch (e: Exception) {
-                Handler(Looper.getMainLooper()).post{
-                    callback(false)
-                }
-            }
-        }.start()
+        for (name in nameList) {
+            databaseReference = database.getReference("UserInRoom/$roomName/$name")
+            databaseReference.setValue(true)
+        }
+
+        callback(true)
+
     }
 }

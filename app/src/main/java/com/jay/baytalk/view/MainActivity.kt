@@ -80,9 +80,12 @@ class MainActivity : BaseActivity() {
         friendAndRoomListViewModel.myNameData.observe(this, Observer{ name ->
             userName = name
             this.showToast("${userName}님 환영합니다")
-            userData = arrayListOf(auth.currentUser!!.uid, userName!!)
+            auth.currentUser?.uid?.let { uId ->
+                userData = arrayListOf(uId, name)
+            }
         })
     }
+
     private fun loadName(currentUser: FirebaseUser?) {
         currentUser ?: return
         friendAndRoomListViewModel.loadMyName(currentUser)
@@ -99,8 +102,8 @@ class MainActivity : BaseActivity() {
         binding.mainViewPager.adapter = adapter
         binding.mainTabLayout.setupWithViewPager(binding.mainViewPager)
 
-        binding.mainTabLayout.getTabAt(0)!!.setIcon(R.drawable.ic_baseline_person_24)
-        binding.mainTabLayout.getTabAt(1)!!.setIcon(R.drawable.ic_baseline_chat_24)
+        binding.mainTabLayout.getTabAt(0)?.setIcon(R.drawable.ic_baseline_person_24)
+        binding.mainTabLayout.getTabAt(1)?.setIcon(R.drawable.ic_baseline_chat_24)
     }
 
     private fun setButton() {

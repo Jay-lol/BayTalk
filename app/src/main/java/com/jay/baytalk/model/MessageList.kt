@@ -1,6 +1,5 @@
 package com.jay.baytalk.model
 
-import android.annotation.SuppressLint
 import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -83,7 +82,8 @@ class MessageList {
     }
 
     fun disconnectServer() {
-        job?:return
-        messageServerReference.removeEventListener(job!!)
+        job?.let{ listener ->
+            messageServerReference.removeEventListener(listener)
+        }
     }
 }

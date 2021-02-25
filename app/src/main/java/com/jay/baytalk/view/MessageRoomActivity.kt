@@ -21,7 +21,7 @@ import org.jetbrains.anko.yesButton
 
 class MessageRoomActivity : BaseActivity() {
 
-    private var rAdapter: RecyclerMessageAdapter? = null
+    private lateinit var messageAdapter: RecyclerMessageAdapter
     private var mList: List<MessageData>? = null
     private var userUid: List<String>? = null
     private lateinit var messageRoomViewModel : MessageRoomViewModel
@@ -52,8 +52,8 @@ class MessageRoomActivity : BaseActivity() {
 
     private fun setAdapter() {
         binding.messageRecycler.layoutManager = LinearLayoutManager(this)
-        rAdapter = RecyclerMessageAdapter(mList, Firebase.auth.currentUser?.uid)
-        binding.messageRecycler.adapter = rAdapter
+        messageAdapter = RecyclerMessageAdapter(mList, Firebase.auth.currentUser?.uid)
+        binding.messageRecycler.adapter = messageAdapter
     }
 
     private fun connectMessageServer(stringExtra: String?) {
@@ -79,10 +79,9 @@ class MessageRoomActivity : BaseActivity() {
      * observeViewModels 로 대체
      */
     private fun showList(message: List<MessageData>) {
-        rAdapter ?: return
-        rAdapter!!.refresh(message)
-        rAdapter!!.notifyDataSetChanged()
-        binding.messageRecycler.scrollToPosition(rAdapter!!.itemCount - 1)
+        messageAdapter.refresh(message)
+        messageAdapter.notifyDataSetChanged()
+        binding.messageRecycler.scrollToPosition(messageAdapter.itemCount - 1)
     }
 
     override fun onPause() {

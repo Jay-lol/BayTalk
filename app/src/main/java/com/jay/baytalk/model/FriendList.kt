@@ -92,7 +92,8 @@ class FriendList {
     }
 
     fun removeListener() {
-        job ?: return
-        myInfoRef.removeEventListener(job!!)
+        job?.let { listener ->
+            myInfoRef.removeEventListener(listener)
+        }
     }
 }
