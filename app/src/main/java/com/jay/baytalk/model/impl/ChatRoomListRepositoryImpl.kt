@@ -1,7 +1,5 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.model.impl
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.ktx.auth
@@ -12,9 +10,10 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.ktx.Firebase
+import com.jay.baytalk.model.ChatRoomListRepository
 import com.jay.baytalk.model.data.ChatRoom
 
-class ChatRoomList {
+class ChatRoomListRepositoryImpl : ChatRoomListRepository {
     private val TAG = "로그 ${this.javaClass.simpleName}"
     private val database = Firebase.database
     private lateinit var databaseReference: DatabaseReference
@@ -30,7 +29,7 @@ class ChatRoomList {
     private val LASTMESSAGE = "lastMessage"
     private val LAST_CHAT_TIME = "time"
 
-    fun getChatRoomList(callback: (MutableList<ChatRoom>) -> Unit) {
+    override fun getChatRoomList(callback: (MutableList<ChatRoom>) -> Unit) {
 
         databaseReference = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}")
 
@@ -60,7 +59,7 @@ class ChatRoomList {
 
     }
 
-    fun deleteChatRoomList(rid: String, callback: (Boolean) -> Unit) {
+    override fun deleteChatRoomList(rid: String, callback: (Boolean) -> Unit) {
         databaseReference = database.getReference("RoomUser/${Firebase.auth.currentUser?.uid}/$rid")
 
         databaseReference.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -82,18 +81,18 @@ class ChatRoomList {
         })
     }
 
-    fun removeListener() {
+    override fun removeListener() {
         job?.let { listener ->
             databaseReference.removeEventListener(listener)
         }
     }
 
-    fun sendFcmId(fcm: String) {
+    override fun sendFcmId(fcm: String) {
         databaseReference = database.getReference("FcmId/${Firebase.auth.currentUser?.uid}")
         databaseReference.setValue(fcm)
     }
 
-    fun setFcm(callback: (Boolean) -> Unit) {
+    override fun setFcm(callback: (Boolean) -> Unit) {
         FirebaseInstanceId.getInstance().instanceId
             .addOnCompleteListener(OnCompleteListener { task ->
                 if (!task.isSuccessful) {
@@ -112,11 +111,11 @@ class ChatRoomList {
             })
     }
 
-    fun showError(error: String) {
+    override fun showError(error: String) {
         Log.d(TAG, error)
     }
 
-    fun makeChatroom(list: List<List<String>>, callback: (Boolean) -> Unit) {
+    override fun makeChatroom(list: List<List<String>>, callback: (Boolean) -> Unit) {
         val size = list.size
         val nTime = System.currentTimeMillis()
         val roomName = "${list[0][0]}@$nTime@${size}방"

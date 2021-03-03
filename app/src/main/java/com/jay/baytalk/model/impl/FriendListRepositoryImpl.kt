@@ -1,4 +1,4 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.model.impl
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseUser
@@ -10,9 +10,10 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import com.jay.baytalk.model.FriendListRepository
 import com.jay.baytalk.model.data.Friend
 
-class FriendList {
+class FriendListRepositoryImpl : FriendListRepository{
     private val TAG = "로그 ${javaClass.simpleName}"
     private lateinit var friendList: MutableList<Friend>
     private val database = Firebase.database
@@ -25,7 +26,7 @@ class FriendList {
     private val NAME = "name"
     private val STATUS_MESSAGE = "statusMessage"
 
-    fun loadFriend(callback: (List<Friend>?) -> Unit) {
+    override fun loadFriend(callback: (List<Friend>?) -> Unit) {
         // Read from the database
         val loadFriendRef = database.getReference("Users")
         loadFriendRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -70,7 +71,7 @@ class FriendList {
     }
 
     private lateinit var myInfoRef : DatabaseReference
-    fun loadMyInfo(currentUser: FirebaseUser, callback: (String) -> Unit) {
+    override fun loadMyInfo(currentUser: FirebaseUser, callback: (String) -> Unit) {
         myInfoRef = database.getReference("Users/${currentUser.uid}/name")
         // Read from the database
 
@@ -91,7 +92,7 @@ class FriendList {
         })
     }
 
-    fun removeListener() {
+    override fun removeListener() {
         job?.let { listener ->
             myInfoRef.removeEventListener(listener)
         }

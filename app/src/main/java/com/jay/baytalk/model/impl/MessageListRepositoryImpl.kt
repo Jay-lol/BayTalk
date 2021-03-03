@@ -1,4 +1,4 @@
-package com.jay.baytalk.model
+package com.jay.baytalk.model.impl
 
 import android.util.Log
 import com.google.firebase.auth.ktx.auth
@@ -8,9 +8,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.jay.baytalk.model.MessageListRepository
 import com.jay.baytalk.model.data.MessageData
 
-class MessageList {
+class MessageListRepositoryImpl : MessageListRepository {
     private val TAG = "로그 ${javaClass.simpleName}"
     private var rid: String? = null
     private var job : ValueEventListener? = null
@@ -20,14 +21,14 @@ class MessageList {
     /**
      * 키값 상수화
      */
-    private val USER_UID = "userUid"
+    private val USER_UID = "userId"
     private val NAME = "name"
     private val LAST_MESSAGE = "lastMessage"
     private val MESSAGE = "message"
     private val TIME = "time"
 
 
-    fun getMessageList(roomId: String?, callback: (List<MessageData>?) -> Unit) {
+    override fun getMessageList(roomId: String?, callback: (List<MessageData>?) -> Unit) {
         rid = roomId
 
         messageServerReference = database.getReference("Message/$roomId")
@@ -57,31 +58,32 @@ class MessageList {
     }
 
     lateinit var sendRef : DatabaseReference
-    fun sendMessage(message: String, name: String?, userUid: List<String>?) {
+    override fun sendMessage(message: String, name: String?, userUid: List<String>?) {
         rid ?: return
         sendRef = database.getReference("Message/$rid")
         sendRef.push().setValue(
-            hashMapOf(
-                Pair(NAME, name),
-                Pair(MESSAGE, message),
-                Pair(USER_UID, Firebase.auth.currentUser?.uid),
-                Pair(TIME,  System.currentTimeMillis())
+            mapOf(
+                NAME to name,
+                MESSAGE to  message,
+                USER_UID to  Firebase.auth.currentUser?.uid,
+                TIME to  System.currentTimeMillis()
             )
         )
         updateLastMessage(message, userUid)
     }
 
     lateinit var updateLastMRef : DatabaseReference
-    private fun updateLastMessage(message: String, userUid: List<String>?) {
+    override fun updateLastMessage(message: String, userUid: List<String>?) {
         if (userUid != null) {
             for (x in userUid) {
                 updateLastMRef = database.getReference("RoomUser/$x/$rid")
-                updateLastMRef.updateChildren(mapOf(Pair(LAST_MESSAGE, message)))
+                updateLastMRef.updateChildren(mapOf(LAST_MESSAGE to message))
+                updateLastMRef.updateChildren(mapOf(TIME to System.currentTimeMillis()))
             }
         }
     }
 
-    fun disconnectServer() {
+    override fun disconnectServer() {
         job?.let{ listener ->
             messageServerReference.removeEventListener(listener)
         }
