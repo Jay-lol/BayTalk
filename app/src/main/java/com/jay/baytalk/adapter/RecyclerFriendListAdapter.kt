@@ -3,46 +3,36 @@ package com.jay.baytalk.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.jay.baytalk.R
+import com.jay.baytalk.adapter.diffutil.FriendDiffUtil
+import com.jay.baytalk.databinding.RecyclerFriendBinding
 import com.jay.baytalk.model.data.Friend
-import kotlinx.android.synthetic.main.recycler_friend.view.*
 
+class RecyclerFriendListAdapter
+    : ListAdapter<Friend, RecyclerFriendListAdapter.FriendViewHolder>(FriendDiffUtil) {
 
-class RecyclerFriendListAdapter(fList : List<Friend>?)
-    : RecyclerView.Adapter<RecyclerFriendListAdapter.FriendViewHolder>() {
+    inner class FriendViewHolder(val view: RecyclerFriendBinding) : RecyclerView.ViewHolder(view.root) {
 
-    private var flist = fList
+        fun onBind(item: Friend, position: Int) {
+            if (position==0)
+                view.itsme.visibility = View.VISIBLE
+            else
+                view.itsme.visibility = View.GONE
 
-    inner class FriendViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var rid : Int? = null
-        var name = view.name
-        var email = view.email
-        var isMe = view.itsme
+            view.name.text = item.name
+            view.email.text = item.memo
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendViewHolder {
         return FriendViewHolder(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.recycler_friend, parent, false))
+            RecyclerFriendBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
     }
 
     override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
-        if (position==0)
-            holder.isMe.visibility = View.VISIBLE
-        else
-            holder.isMe.visibility = View.GONE
-
-        holder.name.text = flist?.get(position)?.name
-        holder.email.text = flist?.get(position)?.memo
-    }
-
-    override fun getItemCount(): Int {
-        return flist?.size ?: 0
-    }
-
-    fun refreshFriendList(newList : List<Friend>){
-        flist = newList
+        holder.onBind(getItem(position), position)
     }
 
 }

@@ -24,7 +24,6 @@ import org.jetbrains.anko.yesButton
 
 class RoomListFragment : Fragment(), OnItemClick {
 
-    private var chatRoomList : List<ChatRoom>? = null
     private var chatRoomListAdapter: RecyclerChatRoomListAdapter? = null
     private val  TAG : String = "로그 ${this.javaClass.simpleName}"
     private lateinit var binding : FragmentRoomBinding
@@ -54,11 +53,7 @@ class RoomListFragment : Fragment(), OnItemClick {
      */
     private fun observeViewModels() {
         friendAndRoomListViewModel.chatRoomListLiveData.observe(viewLifecycleOwner , Observer { roomListValues ->
-            chatRoomList = roomListValues
-            chatRoomList?.let { list ->
-                chatRoomListAdapter?.refresh(list)
-                chatRoomListAdapter?.notifyDataSetChanged()
-            }
+            chatRoomListAdapter?.submitList(roomListValues)
         })
     }
 
@@ -67,8 +62,9 @@ class RoomListFragment : Fragment(), OnItemClick {
     }
 
     private fun setAdapter() {
+        chatRoomListAdapter = RecyclerChatRoomListAdapter(this)
+
         binding.recyclerViewChatRoom.layoutManager = LinearLayoutManager(requireContext())
-        chatRoomListAdapter = RecyclerChatRoomListAdapter(chatRoomList, this)
         binding.recyclerViewChatRoom.adapter = chatRoomListAdapter
     }
 
@@ -99,7 +95,7 @@ class RoomListFragment : Fragment(), OnItemClick {
     }
 
     override fun onChatroomClick(rid: String, chatName: String, userUids: List<String>) {
-        val intent = Intent(context, RoomActivity::class.java)
+        val intent = Intent(context, MessageRoomActivity::class.java)
         intent.putExtra("roomId", rid)
         intent.putExtra("roomName", chatName)
         var useruid = ""

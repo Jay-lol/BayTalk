@@ -1,12 +1,16 @@
 package com.jay.baytalk.view.init
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.jay.baytalk.InfoManager
 import com.jay.baytalk.R
+import com.jay.baytalk.view.MainActivity
 
 
 class SplashActivity : AppCompatActivity() {
@@ -25,11 +29,15 @@ class SplashActivity : AppCompatActivity() {
             window.statusBarColor = Color.BLACK
         }
 
-//        Handler().postDelayed({
-//            Toast.makeText(baseContext,"login",Toast.LENGTH_SHORT)
-//            finish()
-//        }, 2000)
-
+        startMainActivity()
     }
 
+    private fun startMainActivity(){
+        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            startActivity(
+                Intent(this, MainActivity::class.java)
+            )
+            finish() }, 2000
+        )
+    }
 }

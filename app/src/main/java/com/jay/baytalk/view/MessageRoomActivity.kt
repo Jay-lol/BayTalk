@@ -1,6 +1,8 @@
 package com.jay.baytalk.view
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -13,6 +15,7 @@ import com.jay.baytalk.R
 import com.jay.baytalk.adapter.RecyclerMessageAdapter
 import com.jay.baytalk.BaseActivity
 import com.jay.baytalk.databinding.ActivityChatRoomBinding
+import com.jay.baytalk.extension.observeLiveData
 import com.jay.baytalk.model.data.MessageData
 import com.jay.baytalk.viewmodel.MessageRoomViewModel
 import org.jetbrains.anko.alert
@@ -22,7 +25,6 @@ import org.jetbrains.anko.yesButton
 class MessageRoomActivity : BaseActivity() {
 
     private lateinit var messageAdapter: RecyclerMessageAdapter
-    private var mList: List<MessageData>? = null
     private var userUid: List<String>? = null
     private lateinit var messageRoomViewModel : MessageRoomViewModel
     private lateinit var binding : ActivityChatRoomBinding
@@ -45,14 +47,21 @@ class MessageRoomActivity : BaseActivity() {
     }
 
     private fun observeViewModels() {
-        messageRoomViewModel.messageLiveData.observe(this, Observer { messageList ->
-            showList(messageList)
-        })
+        messageRoomViewModel.messageLiveData.observeLiveData(this) {
+            val messageList = it.toMutableList()
+            messageList.last().TIME_VISIBLE = false
+            messageAdapter.submitList(messageList)
+            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                binding.messageRecycler.scrollToPosition(messageList.size-1)
+                 }, 50
+            )
+        }
     }
 
     private fun setAdapter() {
+        messageAdapter = RecyclerMessageAdapter( Firebase.auth.currentUser?.uid)
+
         binding.messageRecycler.layoutManager = LinearLayoutManager(this)
-        messageAdapter = RecyclerMessageAdapter(mList, Firebase.auth.currentUser?.uid)
         binding.messageRecycler.adapter = messageAdapter
     }
 
@@ -70,19 +79,12 @@ class MessageRoomActivity : BaseActivity() {
             this.alert("추가 기능은 개발단계에 있습니다", "추가 기능") {
                 yesButton {
                 }
-                noButton {
-                }
             }.show()
     }
 
     /**
      * observeViewModels 로 대체
      */
-    private fun showList(message: List<MessageData>) {
-        messageAdapter.refresh(message)
-        messageAdapter.notifyDataSetChanged()
-        binding.messageRecycler.scrollToPosition(messageAdapter.itemCount - 1)
-    }
 
     override fun onPause() {
         super.onPause()

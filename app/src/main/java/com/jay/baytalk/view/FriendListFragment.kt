@@ -16,7 +16,7 @@ import com.jay.baytalk.InfoManager.userName
 import com.jay.baytalk.R
 import com.jay.baytalk.adapter.RecyclerFriendListAdapter
 import com.jay.baytalk.databinding.FragmentFriendBinding
-import com.jay.baytalk.extension.showToaster
+import com.jay.baytalk.extension.showToast
 import com.jay.baytalk.model.data.Friend
 import com.jay.baytalk.view.init.LoginActivity
 import com.jay.baytalk.viewmodel.FriendAndRoomListViewModel
@@ -52,8 +52,9 @@ class FriendListFragment : Fragment() {
     }
 
     private fun setAdapter() {
+        friendListAdapter = RecyclerFriendListAdapter()
+
         binding.friendListRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        friendListAdapter = RecyclerFriendListAdapter(friendList)
         binding.friendListRecyclerView.adapter = friendListAdapter
     }
 
@@ -64,8 +65,7 @@ class FriendListFragment : Fragment() {
         friendAndRoomListViewModel.friendListLiveData.observe(viewLifecycleOwner , Observer { friendListValues ->
             friendList = friendListValues
             friendList?.let { list ->
-                friendListAdapter.refreshFriendList(list)
-                friendListAdapter.notifyDataSetChanged()
+                friendListAdapter.submitList(list)
             }
 //            friendList?:return@Observer
 //            fAdapter.refreshFriendList(friendList!!)
@@ -88,6 +88,6 @@ class FriendListFragment : Fragment() {
 
                 }
             }?.show()
-        this.showToaster("Success")
+        this.showToast("Success")
     }
 }

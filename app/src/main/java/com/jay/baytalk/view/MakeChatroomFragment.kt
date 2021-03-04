@@ -15,7 +15,6 @@ import com.jay.baytalk.R
 import com.jay.baytalk.adapter.RecyclerMakeRoomListAdapter
 import com.jay.baytalk.databinding.FragmentMakeRoomBinding
 import com.jay.baytalk.extension.showToast
-import com.jay.baytalk.model.data.Friend
 import com.jay.baytalk.viewmodel.FriendAndRoomListViewModel
 
 class MakeChatroomFragment : Fragment() {
@@ -49,6 +48,7 @@ class MakeChatroomFragment : Fragment() {
         binding.root.isClickable = true
         frag = this
 
+        setAdapter()
         observeViewModels()
 
         return binding.root
@@ -61,7 +61,7 @@ class MakeChatroomFragment : Fragment() {
             closeView()
         })
         friendAndRoomListViewModel.friendListLiveData.observe(viewLifecycleOwner , Observer { friendListValues ->
-            setAdapter(friendListValues)
+            mAdapter?.submitList(friendListValues)
         })
     }
 
@@ -81,22 +81,20 @@ class MakeChatroomFragment : Fragment() {
         fragmentManager.popBackStack()
     }
 
-    private fun setAdapter(fList: List<Friend>) {
-        binding.recyclerViewMakeroom.layoutManager = LinearLayoutManager(requireContext())
-        mAdapter = RecyclerMakeRoomListAdapter(fList) { rid, name, check ->
+    private fun setAdapter() {
+        mAdapter = RecyclerMakeRoomListAdapter { rid, name, check ->
             if (check == 1)
                 inviteList.add(listOf(rid, name))
             else
                 inviteList.remove(listOf(rid, name))
         }
+
+        binding.recyclerViewMakeroom.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerViewMakeroom.adapter = mAdapter
         // 자기자신도 추가
-        val bundle = arguments
-        bundle?.getStringArrayList(MY_PERSONAL_KEY) ?: return
-        bundle.getStringArrayList(MY_PERSONAL_KEY)?.let{ myData ->
+        arguments?.getStringArrayList(MY_PERSONAL_KEY)?.let{ myData ->
             Log.d(TAG, myData[0])
             inviteList.add(listOf(myData[0], myData[1]))
         }
     }
-
 }

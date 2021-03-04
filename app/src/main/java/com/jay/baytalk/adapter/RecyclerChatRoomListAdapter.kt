@@ -1,42 +1,40 @@
 package com.jay.baytalk.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.jay.baytalk.OnItemClick
-import com.jay.baytalk.R
+import com.jay.baytalk.adapter.diffutil.ChatRoomDiffUtil
+import com.jay.baytalk.databinding.RecyclerChatroomBinding
 import com.jay.baytalk.model.data.ChatRoom
 import kotlinx.android.synthetic.main.recycler_chatroom.view.*
 
-class RecyclerChatRoomListAdapter(cList : List<ChatRoom>?, listner : OnItemClick)
-    : RecyclerView.Adapter<RecyclerChatRoomListAdapter.cViewH>(){
+class RecyclerChatRoomListAdapter(listner : OnItemClick)
+    : ListAdapter<ChatRoom, RecyclerChatRoomListAdapter.ChatViewHolder>(ChatRoomDiffUtil){
 
-    private var clist = cList
     private val callback = listner
 
-    class cViewH(view: View) : RecyclerView.ViewHolder(view) {
-        var rid : String? = null
-        var chatName = view.roomName
-        var lastMessage = view.roomMemo
+    inner class ChatViewHolder(val view: RecyclerChatroomBinding) : RecyclerView.ViewHolder(view.root) {
+        fun onBind(item: ChatRoom) {
+            view.roomName.text = item.usersName
+            view.roomMemo.text = item.lastMessage
+            setButton(this , item.roomId, item.usersName, item.userUid)
+        }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): cViewH {
-        return cViewH(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.recycler_chatroom, parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
+        return ChatViewHolder(
+            RecyclerChatroomBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
 
-    override fun onBindViewHolder(holder: cViewH, position: Int) {
-        holder.chatName.text = clist?.get(position)?.usersName
-        holder.lastMessage.text = clist?.get(position)?.lastMessage
-        holder.rid = clist?.get(position)?.roomId as String
-        setButton(holder ,holder.rid , holder.chatName.text.toString(), clist?.get(position)?.userUid)
+    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
+        holder.onBind(getItem(position))
     }
 
     private fun setButton(
-        holder: cViewH,
+        holder: ChatViewHolder,
         rid: String?,
         chatName: String,
         userUid: List<String>?
@@ -50,14 +48,5 @@ class RecyclerChatRoomListAdapter(cList : List<ChatRoom>?, listner : OnItemClick
             userUid?:return@setOnClickListener
             callback.onChatroomClick(rid!!, chatName, userUid)
         }
-
-    }
-
-
-    override fun getItemCount(): Int {
-        return clist?.size ?: 0
-    }
-    fun refresh(newList : List<ChatRoom>){
-        clist = newList
     }
 }
