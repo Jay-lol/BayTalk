@@ -7,6 +7,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -20,18 +23,16 @@ import com.jay.baytalk.InfoManager.userData
 import com.jay.baytalk.InfoManager.userName
 import com.jay.baytalk.R
 import com.jay.baytalk.adapter.PageAdapter
-import com.jay.baytalk.base.BaseActivity
-import com.jay.baytalk.contract.MainConstract
-import com.jay.baytalk.extension.showToaster
-import com.jay.baytalk.presenter.MainPresenter
+import com.jay.baytalk.BaseActivity
+import com.jay.baytalk.databinding.ActivityMainBinding
+import com.jay.baytalk.extension.showToast
 import com.jay.baytalk.view.init.LoginActivity
 import com.jay.baytalk.view.init.SplashActivity
-import kotlinx.android.synthetic.main.activity_main.*
+import com.jay.baytalk.viewmodel.FriendAndRoomListViewModel
 import java.com.jay.baytalk.RTCClient
 
-class MainActivity : BaseActivity(), MainConstract.View {
+class MainActivity : BaseActivity() {
 
-    private lateinit var mPresenter: MainConstract.Presenter
     private lateinit var functions: FirebaseFunctions
 
     private val CAMERA_PERMISSION = Manifest.permission.CAMERA
@@ -40,10 +41,18 @@ class MainActivity : BaseActivity(), MainConstract.View {
     private lateinit var rtcClient: RTCClient
     private val auth = Firebase.auth
 
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var friendAndRoomListViewModel: FriendAndRoomListViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        friendAndRoomListViewModel =
+            ViewModelProvider(this).get(FriendAndRoomListViewModel::class.java)
         InfoManager.mainActivity = this
         InfoManager.mIsInForegroundMode = true
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.lifecycleOwner = this
+        binding.mainActivity = this
         auth.currentUser
         if (auth.currentUser != null) {
             startActivity(Intent(this, SplashActivity::class.java))
@@ -52,7 +61,6 @@ class MainActivity : BaseActivity(), MainConstract.View {
             finish()
             return
         }
-        setContentView(R.layout.activity_main)
         loginActivity?.finish()
 
         connectAdapter()
@@ -61,29 +69,46 @@ class MainActivity : BaseActivity(), MainConstract.View {
 
         functions = Firebase.functions
 
+        observeViewModels()
+
         setButton()
         setFcm()
         checkCameraPermission()
     }
 
+    private fun observeViewModels() {
+        friendAndRoomListViewModel.myNameData.observe(this, Observer{ name ->
+            userName = name
+            this.showToast("${userName}님 환영합니다")
+            auth.currentUser?.uid?.let { uId ->
+                userData = arrayListOf(uId, name)
+            }
+        })
+    }
+
+    private fun loadName(currentUser: FirebaseUser?) {
+        currentUser ?: return
+        friendAndRoomListViewModel.loadMyName(currentUser)
+    }
+    
     private fun setFcm() {
-        mPresenter.setFcm(applicationContext)
+        friendAndRoomListViewModel.setFcm()
     }
 
     private fun connectAdapter() {
         val adapter = PageAdapter(supportFragmentManager)
-        adapter.addItem(FriendFragment())
+        adapter.addItem(FriendListFragment())
         adapter.addItem(RoomListFragment())
-        main_viewPager.adapter = adapter
-        main_tabLayout.setupWithViewPager(main_viewPager)
+        binding.mainViewPager.adapter = adapter
+        binding.mainTabLayout.setupWithViewPager(binding.mainViewPager)
 
-        main_tabLayout.getTabAt(0)!!.setIcon(R.drawable.ic_baseline_person_24)
-        main_tabLayout.getTabAt(1)!!.setIcon(R.drawable.ic_baseline_chat_24)
+        binding.mainTabLayout.getTabAt(0)?.setIcon(R.drawable.ic_baseline_person_24)
+        binding.mainTabLayout.getTabAt(1)?.setIcon(R.drawable.ic_baseline_chat_24)
     }
 
     private fun setButton() {
-        faceChat.setOnClickListener {
-            AlertDialog.Builder(this).setTitle("Error").setMessage(userName+"님 서버가 닫혀있습니다")
+        binding.faceChat.setOnClickListener {
+            AlertDialog.Builder(this).setTitle("Error").setMessage(userName + "님 서버가 닫혀있습니다")
                 .create().show()
         }
     }
@@ -111,36 +136,22 @@ class MainActivity : BaseActivity(), MainConstract.View {
         super.onResume()
         InfoManager.mIsInForegroundMode = true
     }
-    override fun onPause(){
+
+    override fun onPause() {
         super.onPause()
         InfoManager.mIsInForegroundMode = false
     }
 
-    private fun loadName(currentUser: FirebaseUser?) {
-        currentUser?:return
-        mPresenter.welcome(currentUser)
-    }
-
-    override fun welcomeMent(name : String){
-        userName = name
-        this.showToaster("${userName}님 환영합니다")
-        userData = arrayListOf(auth.currentUser!!.uid, userName!!)
-    }
-
-    override fun initPresenter() {
-        mPresenter = MainPresenter()
-        mPresenter.takeView(this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mPresenter.dropView()
-    }
+    /**
+     * observeViewModels로 이동
+     */
 
     private fun checkCameraPermission() {
-        if (ContextCompat.checkSelfPermission(this,
+        if (ContextCompat.checkSelfPermission(
+                this,
                 CAMERA_PERMISSION
-            ) != PackageManager.PERMISSION_GRANTED) {
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
             onCameraPermissionGranted()
         } else onCameraPermissionGranted()
@@ -162,13 +173,5 @@ class MainActivity : BaseActivity(), MainConstract.View {
             frag = null
         }
     }
-
-    override fun showError(error: String) {}
-
-    override fun showToast(msg: String) {
-        this.showToaster(msg)
-    }
-
-    override fun showLoading() {}
 
 }

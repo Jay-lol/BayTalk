@@ -4,48 +4,46 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.jay.baytalk.R
+import com.jay.baytalk.adapter.diffutil.FriendDiffUtil
+import com.jay.baytalk.databinding.RecyclerMakeroomBinding
 import com.jay.baytalk.model.data.Friend
-import kotlinx.android.synthetic.main.recycler_makeroom.view.*
 
-class RecyclerMakeRoomListAdapter(fList : List<Friend>?,
-                                  val callback : (String ,String ,Int) -> Unit)
-    : RecyclerView.Adapter<RecyclerMakeRoomListAdapter.MakeRoomViewHolder>() {
+class RecyclerMakeRoomListAdapter(val callback: (String, String, Int) -> Unit) :
+    ListAdapter<Friend, RecyclerMakeRoomListAdapter.MakeRoomViewHolder>(FriendDiffUtil) {
 
-    private var flist = fList
+    inner class MakeRoomViewHolder(val view: RecyclerMakeroomBinding) : RecyclerView.ViewHolder(view.root) {
 
-    inner class MakeRoomViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var rid : Int? = null
-        var name = view.Mname
-        var checkBox = view.checkBox
+        fun onBind(item: Friend, position: Int) {
+            view.checkBox.isChecked = false
+            if (position == 0) {
+                view.checkBox.visibility = View.GONE
+            } else {
+                view.checkBox.visibility = View.VISIBLE
+            }
+            view.Mname.text = item.name
+            setButton(item.rid, view.checkBox, item.name)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MakeRoomViewHolder {
         return MakeRoomViewHolder(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.recycler_makeroom, parent, false))
+            RecyclerMakeroomBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+        )
     }
 
     override fun onBindViewHolder(holder: MakeRoomViewHolder, position: Int) {
-        holder.checkBox.isChecked = false
-        if (position==0)
-            holder.checkBox.visibility = View.GONE
-        else
-            holder.checkBox.visibility = View.VISIBLE
-
-        holder.name.text = flist?.get(position)?.name
-        setButton(flist?.get(position)?.rid,holder.checkBox, holder.name.text.toString())
+        holder.onBind(getItem(position), position)
     }
 
     private fun setButton(rid: String?, checkBox: CheckBox, name: String) {
         checkBox.setOnClickListener {
-            if (checkBox.isChecked) callback(rid!! ,name, 1)
-            else callback(rid!! ,name, 2)
+            if (checkBox.isChecked) callback(rid!!, name, 1)
+            else callback(rid!!, name, 2)
         }
     }
 
-    override fun getItemCount(): Int {
-        return flist?.size ?: 0
-    }
 }

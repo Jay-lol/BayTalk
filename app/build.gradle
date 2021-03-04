@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 30
@@ -34,6 +35,9 @@ android {
         jvmTarget = '1.8'
     }
 
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -60,4 +64,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-functions-ktx:19.0.2'
     implementation 'com.google.firebase:firebase-messaging:20.2.4'
     implementation "org.jetbrains.anko:anko:$anko_version"
+
+    def lifecycle_version = "2.3.0"
+    // 뷰모델 - 라이프사이클 관련 ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+
+    // 라이브 데이터 - 옵저버 패턴 LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 }
